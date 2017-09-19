@@ -1,6 +1,5 @@
 package ru.xmn.kotlinstarter.features.torrent
 
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 
