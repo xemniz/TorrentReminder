@@ -2,24 +2,14 @@ package ru.xmn.torrentreminder.features.torrent
 
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import io.reactivex.Scheduler
-import io.reactivex.Single
 import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.rxkotlin.toSingle
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subscribers.TestSubscriber
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
-import rx.schedulers.Schedulers.immediate
-import rx.plugins.RxJavaSchedulersHook
 
-
-
-/**
- * Created by USER on 19.09.2017.
- */
 class TorrentSearchUseCaseTest {
     @Before
     fun setUp() {
@@ -30,46 +20,56 @@ class TorrentSearchUseCaseTest {
 
     @Test
     fun searchTorrents() {
+        val searchString = "no matter"
         val searcher = TorrentSearchUseCase(getTorrentSearcherWithUpdates(), getTorrentSearchLastResultRepository())
-        val subscriber: TestSubscriber<List<TorrentSearch>> = TestSubscriber()
-        searcher.getAllSearches().subscribe(subscriber)
+        val subscriberSearches: TestSubscriber<List<TorrentSearch>> = TestSubscriber()
+        searcher.subscribeAllSearches().subscribe(subscriberSearches)
+        val subscriberSearch: TestSubscriber<TorrentSearch> = TestSubscriber()
+        searcher.subscribeSearch(searchString).subscribe(subscriberSearch)
 
         //первый запрос - два новых итема
-        searcher.insertOrUpdateSearch("no matter")
+        searcher.search(searchString)
 
         //второй запрос - новые стали старыми, один новый
-        searcher.insertOrUpdateSearch("no matter")
+        searcher.search(searchString)
 
         //третий запрос - все стали старыми
-        searcher.insertOrUpdateSearch("no matter")
+        searcher.search(searchString)
 
-        val expected1 = TorrentSearch("no matter", firstQuery.map { TorrentItem(it, true) })
-        val expected2 = TorrentSearch("no matter", listOf(
+        val expected1 = TorrentSearch(searchString, firstQuery.map { TorrentItem(it, true) })
+        val expected2 = TorrentSearch(searchString, listOf(
                 TorrentItem(TorrentData("name1", "url"), false),
                 TorrentItem(TorrentData("name2", "url"), false),
                 TorrentItem(TorrentData("name3", "url"), true)
         ))
-        val expected3 = TorrentSearch("no matter", updatedQuery.map { TorrentItem(it, false) })
+        val expected3 = TorrentSearch(searchString, updatedQuery.map { TorrentItem(it, false) })
 
-        listOf(expected1, expected2, expected3).zip(subscriber.events[0]).forEach { Assert.assertEquals(listOf(it.first), it.second) }
+        listOf(expected1, expected2, expected3).zip(subscriberSearches.events[0]).forEach { Assert.assertEquals(listOf(it.first), it.second) }
+        listOf(expected1, expected2, expected3).zip(subscriberSearch.events[0]).forEach { Assert.assertEquals(it.first, it.second) }
     }
 
     private fun getTorrentSearchLastResultRepository(): TorrentSearchRepository {
         return object : TorrentSearchRepository {
+            val resultsSubject: PublishSubject<List<TorrentSearch>> = PublishSubject.create<List<TorrentSearch>>()
+            val resultSubject: PublishSubject<TorrentSearch> = PublishSubject.create<TorrentSearch>()
+            var result: TorrentSearch = TorrentSearch("", emptyList<TorrentItem>())
+
+            override fun subscribeSearch(query: String): Flowable<TorrentSearch> {
+                return resultSubject.toFlowable(BackpressureStrategy.LATEST)
+            }
+
             override fun delete(result: TorrentSearch) {
 
             }
 
-            val resultSubject: PublishSubject<List<TorrentSearch>> = PublishSubject.create<List<TorrentSearch>>()
-            var result: TorrentSearch = TorrentSearch("", emptyList<TorrentItem>())
-
             override fun insertOrUpdate(result: TorrentSearch) {
-                resultSubject.onNext(listOf(result))
+                resultsSubject.onNext(listOf(result))
+                resultSubject.onNext(result)
                 this.result = result
             }
 
-            override fun getAll(): Flowable<List<TorrentSearch>> {
-                return resultSubject.toFlowable(BackpressureStrategy.LATEST)
+            override fun subscribeAllSearches(): Flowable<List<TorrentSearch>> {
+                return resultsSubject.toFlowable(BackpressureStrategy.LATEST)
             }
 
             override fun get(query: String): TorrentSearch {
