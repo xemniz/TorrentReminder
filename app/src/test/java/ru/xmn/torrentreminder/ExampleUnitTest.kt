@@ -1,4 +1,4 @@
-package ru.xmn.kotlinstarter
+package ru.xmn.torrentreminder
 
 import org.junit.Test
 

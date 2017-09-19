@@ -1,4 +1,4 @@
-package ru.xmn.kotlinstarter.application.di
+package ru.xmn.torrentreminder.application.di
 
 import android.content.Context
 import com.squareup.moshi.Moshi

@@ -1,4 +1,4 @@
-package ru.xmn.kotlinstarter.screens
+package ru.xmn.torrentreminder.screens
 
 import android.arch.lifecycle.*
 import android.os.Bundle
@@ -8,13 +8,13 @@ import dagger.Subcomponent
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import ru.xmn.kotlinstarter.R
+import ru.xmn.torrentreminder.R
 
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.xmn.common.extensions.gone
 import ru.xmn.common.extensions.visible
-import ru.xmn.kotlinstarter.application.App
-import ru.xmn.kotlinstarter.application.di.scopes.ActivityScope
+import ru.xmn.torrentreminder.application.App
+import ru.xmn.torrentreminder.application.di.scopes.ActivityScope
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton

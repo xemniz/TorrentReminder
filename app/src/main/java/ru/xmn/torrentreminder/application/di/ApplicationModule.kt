@@ -1,10 +1,10 @@
-package ru.xmn.kotlinstarter.application.di
+package ru.xmn.torrentreminder.application.di
 
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import ru.xmn.kotlinstarter.application.App
-import ru.xmn.kotlinstarter.screens.AbstractComponent
+import ru.xmn.torrentreminder.application.App
+import ru.xmn.torrentreminder.screens.AbstractComponent
 import javax.inject.Singleton
 
 @Module(subcomponents = arrayOf(AbstractComponent::class))

@@ -1,4 +1,4 @@
-package ru.xmn.kotlinstarter.features.torrent
+package ru.xmn.torrentreminder.features.torrent
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -16,28 +16,28 @@ class JsoupTorrentSearcherTest {
     @Test
     fun searchTorrentsWithEmptyDocument() {
         val searcher = JsoupTorrentSearcher { getEmptyDocument() }
-        assertEquals(emptyList<List<TorrentItem>>(), searcher.searchTorrents("no matters"))
+        assertEquals(emptyList<List<TorrentData>>(), searcher.searchTorrents("no matters"))
     }
 
     private fun getEmptyDocument(): Document {
         return Jsoup.parse("")
     }
 
-    private fun getExpected(): List<TorrentItem> {
+    private fun getExpected(): List<TorrentData> {
         return listOf(
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip-AVC от HELLYWOOD | iTunes", "/download/580375"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) HDRip от Scarabey | iTunes", "/download/580366"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip-AVC от HELLYWOOD | iTunes", "/download/580321"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) HDRip от Generalfilm | КПК | iTunes", "/download/580280"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip 1080p от ExKinoRay | iTunes", "/download/580277"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip 720p от ExKinoRay | iTunes", "/download/580276"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip 1080p | iTunes", "/download/580261"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip 720p | iTunes", "/download/580259"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip-AVC от OlLanDGroup | iTunes", "/download/580122"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip-AVC от MegaPeer | iTunes", "/download/580096"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip-AVC от MegaPeer | iTunes", "/download/580084"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip от MegaPeer | iTunes", "/download/580069"),
-                TorrentItem("Во всем виноват енот / Wakefield (2016) BDRip от MegaPeer | iTunes", "/download/580066")
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip-AVC от HELLYWOOD | iTunes", "/download/580375"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) HDRip от Scarabey | iTunes", "/download/580366"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip-AVC от HELLYWOOD | iTunes", "/download/580321"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) HDRip от Generalfilm | КПК | iTunes", "/download/580280"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip 1080p от ExKinoRay | iTunes", "/download/580277"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip 720p от ExKinoRay | iTunes", "/download/580276"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip 1080p | iTunes", "/download/580261"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip 720p | iTunes", "/download/580259"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip-AVC от OlLanDGroup | iTunes", "/download/580122"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip-AVC от MegaPeer | iTunes", "/download/580096"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip-AVC от MegaPeer | iTunes", "/download/580084"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip от MegaPeer | iTunes", "/download/580069"),
+                TorrentData("Во всем виноват енот / Wakefield (2016) BDRip от MegaPeer | iTunes", "/download/580066")
         )
     }
 

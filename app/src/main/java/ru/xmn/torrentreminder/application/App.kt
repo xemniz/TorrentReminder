@@ -1,12 +1,12 @@
-package ru.xmn.kotlinstarter.application
+package ru.xmn.torrentreminder.application
 
 import android.app.Application
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import ru.xmn.kotlinstarter.BuildConfig
-import ru.xmn.kotlinstarter.application.di.ApplicationComponent
-import ru.xmn.kotlinstarter.application.di.ApplicationModule
-import ru.xmn.kotlinstarter.application.di.DaggerApplicationComponent
+import ru.xmn.torrentreminder.BuildConfig
+import ru.xmn.torrentreminder.application.di.ApplicationComponent
+import ru.xmn.torrentreminder.application.di.ApplicationModule
+import ru.xmn.torrentreminder.application.di.DaggerApplicationComponent
 
 
 

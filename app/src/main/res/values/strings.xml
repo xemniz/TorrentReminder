@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Kotlin starter</string>
+    <string name="app_name">Torrent reminder</string>
     <string name="title_activity_main">MainActivity</string>
 </resources>

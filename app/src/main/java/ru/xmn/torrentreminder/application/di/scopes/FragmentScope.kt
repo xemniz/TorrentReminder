@@ -1,4 +1,4 @@
-package ru.xmn.kotlinstarter.application.di.scopes
+package ru.xmn.torrentreminder.application.di.scopes
 
 import javax.inject.Scope
 

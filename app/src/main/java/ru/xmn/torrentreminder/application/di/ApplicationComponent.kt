@@ -1,7 +1,7 @@
-package ru.xmn.kotlinstarter.application.di
+package ru.xmn.torrentreminder.application.di
 
 import dagger.Component
-import ru.xmn.kotlinstarter.screens.AbstractComponent
+import ru.xmn.torrentreminder.screens.AbstractComponent
 import javax.inject.Singleton
 
 @Singleton
