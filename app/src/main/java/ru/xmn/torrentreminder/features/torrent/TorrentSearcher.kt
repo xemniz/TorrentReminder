@@ -18,15 +18,11 @@ class JsoupTorrentSearcher(val documentProvider: (String) -> Document) : Torrent
                 .select("tr")
                 .select("td")
 
-        val name = newsHeadlines.select("a[href*=/torrent/]")
-        val torrentUrl = newsHeadlines.select("a.downgif")
+        val names = newsHeadlines.select("a[href*=/torrent/]")
+        val torrentUrls = newsHeadlines.select("a.downgif")
 
         if (!newsHeadlines.isEmpty()) {
-
-            val torrentData: List<TorrentData> = List(name.size,
-                    init = { i -> TorrentData(name[i].html(), torrentUrl[i].attr("href")) })
-
-            return torrentData
+            return names.zip(torrentUrls){name, url -> TorrentData(name.html(), url.attr("href")) }
         } else {
             return emptyList()
         }
