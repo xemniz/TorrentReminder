@@ -4,14 +4,14 @@ import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 
 class TorrentSearchUseCase(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: TorrentSearchRepository) {
-    fun search(searchString: String) {
-        Flowable.fromCallable { torrentSearcher.searchTorrents(searchString) }
+    fun search(searchQuery: String) {
+        Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
                 .subscribeOn(Schedulers.io())
-                .subscribe { torrentSearchRepository.insertOrUpdate(searchString, it) }
+                .subscribe { torrentSearchRepository.insertOrUpdate(searchQuery, it) }
     }
 
-    fun checkAllAsViewed() {
-        Flowable.fromCallable { torrentSearchRepository.checkAllAsViewed() }
+    fun checkAllAsViewed(searchQuery: String) {
+        Flowable.fromCallable { torrentSearchRepository.checkAllAsViewed(searchQuery) }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
     }
@@ -32,16 +32,16 @@ class TorrentSearchUseCase(val torrentSearcher: TorrentSearcher, val torrentSear
 }
 
 interface TorrentSearchRepository {
-    fun delete(result: String)
-    fun subscribeSearch(query: String): Flowable<TorrentSearch>
+    fun delete(searchQuery: String)
+    fun subscribeSearch(searchQuery: String): Flowable<TorrentSearch>
     fun subscribeAllSearches(): Flowable<List<TorrentSearch>>
-    fun insertOrUpdate(searchString: String, dataList: List<TorrentData>)
-    fun checkAllAsViewed()
+    fun insertOrUpdate(searchQuery: String, dataList: List<TorrentData>)
+    fun checkAllAsViewed(searchQuery: String)
 }
 
-data class TorrentItem(val item: TorrentData, val isViwed: Boolean)
+data class TorrentItem(val item: TorrentData, val isViewed: Boolean)
 
-data class TorrentSearch(val query: String, val lastSearchedItems: List<TorrentItem>) {
+data class TorrentSearch(val searchQuery: String, val lastSearchedItems: List<TorrentItem>) {
     val hasUpdates: Boolean
-        get() = lastSearchedItems.firstOrNull { !it.isViwed } != null
+        get() = lastSearchedItems.firstOrNull { !it.isViewed } != null
 }
