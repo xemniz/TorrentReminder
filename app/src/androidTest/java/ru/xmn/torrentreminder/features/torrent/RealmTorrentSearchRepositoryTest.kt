@@ -4,7 +4,6 @@ import android.os.Handler
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
-import android.util.Log
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import org.junit.After
@@ -12,8 +11,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import javax.xml.datatype.DatatypeConstants.SECONDS
-import org.junit.Rule
 
 
 @RunWith(AndroidJUnit4::class)

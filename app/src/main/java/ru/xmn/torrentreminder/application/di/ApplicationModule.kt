@@ -4,10 +4,10 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import ru.xmn.torrentreminder.application.App
-import ru.xmn.torrentreminder.screens.AbstractComponent
+import ru.xmn.torrentreminder.screens.torrentitem.TorrentItemsComponent
 import javax.inject.Singleton
 
-@Module(subcomponents = arrayOf(AbstractComponent::class))
+@Module(subcomponents = arrayOf(TorrentItemsComponent::class))
 class ApplicationModule(private val app: App) {
     @Provides
     @Singleton

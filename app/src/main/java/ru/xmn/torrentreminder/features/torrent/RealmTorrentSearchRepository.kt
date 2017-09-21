@@ -9,8 +9,13 @@ import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
 import io.realm.annotations.PrimaryKey
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RealmTorrentSearchRepository : TorrentSearchRepository {
+class RealmTorrentSearchRepository
+@Inject
+@Singleton
+constructor() : TorrentSearchRepository {
     override fun delete(searchQuery: String) {
         Realm.getDefaultInstance().use {
             val realmTorrentSearch = it.where(RealmTorrentSearch::class.java)
