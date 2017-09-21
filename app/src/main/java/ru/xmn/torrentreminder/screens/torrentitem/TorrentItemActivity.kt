@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.torrent_list.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.application.di.scopes.ActivityScope
+import ru.xmn.torrentreminder.features.torrent.TorrentSearch
 import ru.xmn.torrentreminder.features.torrent.TorrentSearchUseCase
 import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
@@ -80,7 +81,9 @@ class TorrentItemsViewModel : ViewModel() {
     init {
         App.component.torrentItemsComponent().provideModule(TorrentItemsRepository()).build().inject(this)
         torrentSearchUseCase.subscribeAllSearches()
-                .map { TorrentItemsState.Success(it.map { TorrentSearchViewItem.Common(it) }) as TorrentItemsState }
+                .map<List<TorrentSearchViewItem>> { it.map { TorrentSearchViewItem.Common(it) } }
+                .map { listOf<TorrentSearchViewItem>(TorrentSearchViewItem.NewItem(), *it.toTypedArray()) }
+                .map { TorrentItemsState.Success(it) as TorrentItemsState }
                 .startWith(TorrentItemsState.Loading)
                 .onErrorReturn { TorrentItemsState.Error(it) }
                 .subscribeOn(Schedulers.io())
