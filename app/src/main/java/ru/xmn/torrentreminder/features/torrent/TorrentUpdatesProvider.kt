@@ -39,7 +39,9 @@ interface TorrentSearchRepository {
     fun checkAllAsViewed(searchQuery: String)
 }
 
-data class TorrentItem(val item: TorrentData, val isViewed: Boolean)
+data class TorrentItem(private val item: TorrentData, val isViewed: Boolean) : TorrentDataOwner by item {
+    constructor(name: String, torrentUrl: String, isViewed: Boolean) : this(TorrentData(name, torrentUrl), isViewed)
+}
 
 data class TorrentSearch(val searchQuery: String, val lastSearchedItems: List<TorrentItem>) {
     val hasUpdates: Boolean

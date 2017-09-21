@@ -7,7 +7,12 @@ interface TorrentSearcher {
     fun searchTorrents(query: String): List<TorrentData>
 }
 
-data class TorrentData(val name: String, val torrentUrl: String)
+data class TorrentData(override val name: String, override val torrentUrl: String): TorrentDataOwner
+
+interface TorrentDataOwner {
+    val name:String
+    val torrentUrl:String
+}
 
 class JsoupTorrentSearcher(val documentProvider: (String) -> Document) : TorrentSearcher {
     override fun searchTorrents(query: String): List<TorrentData> {

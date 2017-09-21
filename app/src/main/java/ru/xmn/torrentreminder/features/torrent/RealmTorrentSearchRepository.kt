@@ -108,8 +108,8 @@ private fun <E : RealmObject> List<E>.toRealmList(): RealmList<E> {
 
 fun TorrentItem.toRealm(): RealmTorrentItem {
     return RealmTorrentItem().apply {
-        name = this@toRealm.item.name
-        torrentUrl = this@toRealm.item.torrentUrl
+        name = this@toRealm.name
+        torrentUrl = this@toRealm.torrentUrl
         isViewed = this@toRealm.isViewed
     }
 }
@@ -119,7 +119,7 @@ fun RealmTorrentSearch.fromRealm(): TorrentSearch {
 }
 
 fun RealmTorrentItem.fromRealm(): TorrentItem {
-    return TorrentItem(TorrentData(this.name, this.torrentUrl), this.isViewed)
+    return TorrentItem(this.name, this.torrentUrl, this.isViewed)
 }
 
 open class RealmTorrentSearch : RealmObject() {
