@@ -28,7 +28,7 @@ class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit) : 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit) {
             with(itemView) {
-                torrentDeleteItem.setOnClickListener { TorrentSearchViewModel().deleteItem((it.parent as View).torrentName.toString()) }
+                torrentDeleteItem.setOnClickListener { TorrentSearchViewModel().deleteItem( torrentSearch.id ) }
                 torrentNameEditorButton.setOnClickListener { torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString()) }
                 torrentName.text = torrentSearch.searchQuery
                 torrentNameEditor.setText(torrentSearch.searchQuery)
