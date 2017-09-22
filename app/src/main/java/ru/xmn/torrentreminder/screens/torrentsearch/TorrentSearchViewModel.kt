@@ -30,4 +30,8 @@ class TorrentSearchViewModel : ViewModel() {
     fun updateSearch(id:String, query: String) {
         torrentSearchUseCase.search(id, query)
     }
+
+    fun deleteItem(query: String){
+        torrentSearchUseCase.delete(query)
+    }
 }

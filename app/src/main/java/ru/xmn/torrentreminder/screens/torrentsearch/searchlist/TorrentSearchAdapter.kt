@@ -11,6 +11,7 @@ import ru.xmn.common.extensions.visible
 import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
+import ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchViewModel
 import kotlin.properties.Delegates
 
 class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit) : RecyclerView.Adapter<TorrentSearchAdapter.ViewHolder>(), AutoUpdatableAdapter {
@@ -27,6 +28,7 @@ class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit) : 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit) {
             with(itemView) {
+                torrentDeleteItem.setOnClickListener { TorrentSearchViewModel().deleteItem((it.parent as View).torrentName.toString()) }
                 torrentNameEditorButton.setOnClickListener { torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString()) }
                 torrentName.text = torrentSearch.searchQuery
                 torrentNameEditor.setText(torrentSearch.searchQuery)
