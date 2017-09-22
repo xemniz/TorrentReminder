@@ -9,13 +9,21 @@ class JsoupTorrentSearcherTest {
 
     @Test
     fun searchTorrents() {
-        val searcher = JsoupTorrentSearcher { getDocument() }
+        val searcher = JsoupTorrentSearcher(object : DocumentProvider {
+            override fun provide(q: String): Document {
+                return getDocument()
+            }
+        })
         assertEquals(getExpected(), searcher.searchTorrents("no matters"))
     }
 
     @Test
     fun searchTorrentsWithEmptyDocument() {
-        val searcher = JsoupTorrentSearcher { getEmptyDocument() }
+        val searcher = JsoupTorrentSearcher(object : DocumentProvider {
+            override fun provide(q: String): Document {
+                return getEmptyDocument()
+            }
+        })
         assertEquals(emptyList<List<TorrentData>>(), searcher.searchTorrents("no matters"))
     }
 

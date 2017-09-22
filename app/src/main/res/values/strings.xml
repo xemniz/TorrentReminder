@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Torrent reminder</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="torrent_search_hint">Поиск торрента</string>
 </resources>

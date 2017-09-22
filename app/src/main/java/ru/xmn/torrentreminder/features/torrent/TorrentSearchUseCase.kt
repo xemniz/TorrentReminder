@@ -1,29 +1,34 @@
 package ru.xmn.torrentreminder.features.torrent
 
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
-import ru.xmn.torrentreminder.application.di.scopes.ActivityScope
 import javax.inject.Inject
 
 class TorrentSearchUseCase
-@ActivityScope
 @Inject
 constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: TorrentSearchRepository) {
 
-    fun search(searchQuery: String) {
+    fun addEmptyItem() {
+        Completable.fromCallable { torrentSearchRepository.insert("", emptyList()) }
+                .subscribeOn(Schedulers.io())
+                .subscribe { }
+    }
+
+    fun search(id: String, searchQuery: String) {
         Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
                 .subscribeOn(Schedulers.io())
-                .subscribe { torrentSearchRepository.insertOrUpdate(searchQuery, it) }
+                .subscribe { torrentSearchRepository.update(id, searchQuery, it) }
     }
 
     fun checkAllAsViewed(searchQuery: String) {
-        Flowable.fromCallable { torrentSearchRepository.checkAllAsViewed(searchQuery) }
+        Completable.fromCallable { torrentSearchRepository.checkAllItemsInSearchAsViewed(searchQuery) }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
     }
 
     fun delete(query: String) {
-        Flowable.fromCallable { torrentSearchRepository.delete(query) }
+        Completable.fromCallable { torrentSearchRepository.delete(query) }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
     }

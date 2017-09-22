@@ -1,25 +1,20 @@
 package ru.xmn.torrentreminder.features.torrent
 
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
+import android.util.Log
+import io.reactivex.*
 import io.reactivex.disposables.Disposables
-import io.reactivex.schedulers.Schedulers
-import io.realm.Realm
-import io.realm.RealmList
-import io.realm.RealmObject
-import io.realm.RealmResults
+import io.realm.*
 import io.realm.annotations.PrimaryKey
-import javax.inject.Inject
-import javax.inject.Singleton
+import java.util.*
 
-class RealmTorrentSearchRepository
-@Inject
-@Singleton
-constructor() : TorrentSearchRepository {
-    override fun delete(searchQuery: String) {
+class RealmTorrentSearchRepository : TorrentSearchRepository {
+    lateinit var searchAllChangeListener: RealmChangeListener<RealmResults<RealmTorrentSearch>>
+    lateinit var oneSearchChangeListener: RealmChangeListener<RealmResults<RealmTorrentSearch>>
+
+    override fun delete(id: String) {
         Realm.getDefaultInstance().use {
             val realmTorrentSearch = it.where(RealmTorrentSearch::class.java)
-                    .equalTo(RealmTorrentSearch.QUERY, searchQuery)
+                    .equalTo(RealmTorrentSearch.ID, id)
                     .findFirst()
 
             if (realmTorrentSearch != null)
@@ -29,10 +24,31 @@ constructor() : TorrentSearchRepository {
         }
     }
 
-    override fun insertOrUpdate(searchQuery: String, dataList: List<TorrentData>) {
+    override fun update(id: String, searchQuery: String, dataList: List<TorrentData>) {
         Realm.getDefaultInstance().use { realm ->
             val realmTorrentSearch = realm.where(RealmTorrentSearch::class.java)
-                    .equalTo(RealmTorrentSearch.QUERY, searchQuery)
+                    .equalTo(RealmTorrentSearch.ID, id)
+                    .findFirst()
+
+            if (realmTorrentSearch != null) realmTorrentSearch.apply {
+                val newItems = dataList.map { TorrentItem(it, false) }
+                        .map { it.toRealm() }
+                        .filter { newItem -> torrentItems.firstOrNull { oldItem -> oldItem.name == newItem.name } == null }
+                realm.executeTransaction {
+                    this.searchQuery = searchQuery
+                    this.torrentItems.addAll(newItems)
+                }
+            } else {
+                Log.d("RealmSearchRepository", "вызван метод update(), Итем не найден")
+            }
+            Unit
+        }
+    }
+
+    override fun insert(name: String, dataList: List<TorrentData>) {
+        Realm.getDefaultInstance().use { realm ->
+            val realmTorrentSearch = realm.where(RealmTorrentSearch::class.java)
+                    .equalTo(RealmTorrentSearch.ID, name)
                     .findFirst()
 
             if (realmTorrentSearch == null)
@@ -53,55 +69,75 @@ constructor() : TorrentSearchRepository {
         }
     }
 
-    override fun checkAllAsViewed(searchQuery: String) {
+    override fun checkAllItemsInSearchAsViewed(id: String) {
         Realm.getDefaultInstance().use {
             val realmTorrentSearch = it.where(RealmTorrentSearch::class.java)
-                    .equalTo(RealmTorrentSearch.QUERY, searchQuery)
+                    .equalTo(RealmTorrentSearch.ID, id)
                     .findFirst()
 
             it.executeTransaction { realmTorrentSearch?.torrentItems?.forEach { it.isViewed = true } }
         }
     }
 
-    override fun subscribeSearch(searchQuery: String): Flowable<TorrentSearch> {
-        return asFlowable { realm ->
-            realm.where(RealmTorrentSearch::class.java)
-                    .equalTo(RealmTorrentSearch.QUERY, searchQuery)
-                    .findAllAsync()
-        }
+    override fun subscribeSearch(id: String): Flowable<TorrentSearch> {
+        return Flowable.create(object : FlowableOnSubscribe<List<RealmTorrentSearch>> {
+
+            override fun subscribe(emitter: FlowableEmitter<List<RealmTorrentSearch>>) {
+                val realm = Realm.getDefaultInstance()
+                val realmResults = realm.where(RealmTorrentSearch::class.java)
+                        .equalTo(RealmTorrentSearch.ID, id)
+                        .findAllAsync()
+                oneSearchChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
+                    override fun onChange(results: RealmResults<RealmTorrentSearch>) {
+                        if (results.isLoaded && !emitter.isCancelled) {
+                            val search = results
+                            if (!emitter.isCancelled)
+                                emitter.onNext(ArrayList(search))
+                        }
+                    }
+
+                }
+                realmResults.addChangeListener(searchAllChangeListener)
+                emitter.setDisposable(Disposables.fromAction {
+                    if (realmResults.isValid)
+                        realmResults.removeChangeListener(searchAllChangeListener)
+                    realm.close()
+                })
+            }
+
+        }, BackpressureStrategy.LATEST)
                 .filter { it.isNotEmpty() }
                 .map { it[0] }
                 .map { it.fromRealm() }
-                .subscribeOn(Schedulers.io())
     }
 
     override fun subscribeAllSearches(): Flowable<List<TorrentSearch>> {
-        return asFlowable { realm ->
-            realm.where(RealmTorrentSearch::class.java)
-                    .findAllAsync()
-        }
-                .map { it.map { it.fromRealm() } }
-                .subscribeOn(Schedulers.io())
-    }
+        return Flowable.create(object : FlowableOnSubscribe<List<RealmTorrentSearch>> {
 
-    private fun <T : RealmObject> asFlowable(query: (Realm) -> RealmResults<T>): Flowable<List<T>> {
-        return Flowable.create({ emitter ->
-            val realm = Realm.getDefaultInstance()
-            val realmResults = query(realm)
-            emitter.setDisposable(Disposables.fromAction {
-                if (realmResults.isValid)
-                    realmResults.removeAllChangeListeners()
-                realm.close()
-            })
-            realmResults.addChangeListener { results ->
-                if (results.isLoaded && !emitter.isCancelled) {
-                    val search = results
-                    if (!emitter.isCancelled)
-                        emitter.onNext(ArrayList(search))
+            override fun subscribe(emitter: FlowableEmitter<List<RealmTorrentSearch>>) {
+                val realm = Realm.getDefaultInstance()
+                val realmResults = realm.where(RealmTorrentSearch::class.java).findAllAsync()
+
+                searchAllChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
+                    override fun onChange(results: RealmResults<RealmTorrentSearch>) {
+                        if (results.isLoaded && !emitter.isCancelled) {
+                            val search = results
+                            if (!emitter.isCancelled)
+                                emitter.onNext(ArrayList(search))
+                        }
+                    }
+
                 }
-
+                realmResults.addChangeListener(searchAllChangeListener)
+                emitter.setDisposable(Disposables.fromAction {
+                    if (realmResults.isValid)
+                        realmResults.removeChangeListener(searchAllChangeListener)
+                    realm.close()
+                })
             }
+
         }, BackpressureStrategy.LATEST)
+                .map { it.map { it.fromRealm() } }
     }
 }
 
@@ -120,7 +156,7 @@ fun TorrentItem.toRealm(): RealmTorrentItem {
 }
 
 fun RealmTorrentSearch.fromRealm(): TorrentSearch {
-    return TorrentSearch(this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
+    return TorrentSearch(this.id, this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
 }
 
 fun RealmTorrentItem.fromRealm(): TorrentItem {
@@ -129,10 +165,12 @@ fun RealmTorrentItem.fromRealm(): TorrentItem {
 
 open class RealmTorrentSearch : RealmObject() {
     companion object {
-        val QUERY = "searchQuery"
+        val ID = "id"
+        val SEARCHQUERY = "searchQuery"
     }
 
     @PrimaryKey
+    var id: String = UUID.randomUUID().toString()
     var searchQuery: String = ""
     var torrentItems: RealmList<RealmTorrentItem> = RealmList()
 
