@@ -74,31 +74,27 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
     }
 
     override fun subscribeSearch(id: String): Flowable<TorrentSearch> {
-        return Flowable.create(object : FlowableOnSubscribe<List<RealmTorrentSearch>> {
-
-            override fun subscribe(emitter: FlowableEmitter<List<RealmTorrentSearch>>) {
-                val realm = Realm.getDefaultInstance()
-                val realmResults = realm.where(RealmTorrentSearch::class.java)
-                        .equalTo(RealmTorrentSearch.ID, id)
-                        .findAllAsync()
-                oneSearchChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
-                    override fun onChange(results: RealmResults<RealmTorrentSearch>) {
-                        if (results.isLoaded && !emitter.isCancelled) {
-                            val search = results
-                            if (!emitter.isCancelled)
-                                emitter.onNext(ArrayList(search))
-                        }
+        return Flowable.create(FlowableOnSubscribe<List<RealmTorrentSearch>> { emitter ->
+            val realm = Realm.getDefaultInstance()
+            val realmResults = realm.where(RealmTorrentSearch::class.java)
+                    .equalTo(RealmTorrentSearch.ID, id)
+                    .findAllAsync()
+            oneSearchChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
+                override fun onChange(results: RealmResults<RealmTorrentSearch>) {
+                    if (results.isLoaded && !emitter.isCancelled) {
+                        val search = results
+                        if (!emitter.isCancelled)
+                            emitter.onNext(ArrayList(search))
                     }
-
                 }
-                realmResults.addChangeListener(searchAllChangeListener)
-                emitter.setDisposable(Disposables.fromAction {
-                    if (realmResults.isValid)
-                        realmResults.removeChangeListener(searchAllChangeListener)
-                    realm.close()
-                })
-            }
 
+            }
+            realmResults.addChangeListener(searchAllChangeListener)
+            emitter.setDisposable(Disposables.fromAction {
+                if (realmResults.isValid)
+                    realmResults.removeChangeListener(searchAllChangeListener)
+                realm.close()
+            })
         }, BackpressureStrategy.LATEST)
                 .filter { it.isNotEmpty() }
                 .map { it[0] }
@@ -106,30 +102,26 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
     }
 
     override fun subscribeAllSearches(): Flowable<List<TorrentSearch>> {
-        return Flowable.create(object : FlowableOnSubscribe<List<RealmTorrentSearch>> {
+        return Flowable.create(FlowableOnSubscribe<List<RealmTorrentSearch>> { emitter ->
+            val realm = Realm.getDefaultInstance()
+            val realmResults = realm.where(RealmTorrentSearch::class.java).findAllAsync()
 
-            override fun subscribe(emitter: FlowableEmitter<List<RealmTorrentSearch>>) {
-                val realm = Realm.getDefaultInstance()
-                val realmResults = realm.where(RealmTorrentSearch::class.java).findAllAsync()
-
-                searchAllChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
-                    override fun onChange(results: RealmResults<RealmTorrentSearch>) {
-                        if (results.isLoaded && !emitter.isCancelled) {
-                            val search = results
-                            if (!emitter.isCancelled)
-                                emitter.onNext(ArrayList(search))
-                        }
+            searchAllChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
+                override fun onChange(results: RealmResults<RealmTorrentSearch>) {
+                    if (results.isLoaded && !emitter.isCancelled) {
+                        val search = results
+                        if (!emitter.isCancelled)
+                            emitter.onNext(ArrayList(search))
                     }
-
                 }
-                realmResults.addChangeListener(searchAllChangeListener)
-                emitter.setDisposable(Disposables.fromAction {
-                    if (realmResults.isValid)
-                        realmResults.removeChangeListener(searchAllChangeListener)
-                    realm.close()
-                })
-            }
 
+            }
+            realmResults.addChangeListener(searchAllChangeListener)
+            emitter.setDisposable(Disposables.fromAction {
+                if (realmResults.isValid)
+                    realmResults.removeChangeListener(searchAllChangeListener)
+                realm.close()
+            })
         }, BackpressureStrategy.LATEST)
                 .map { it.map { it.fromRealm() } }
     }

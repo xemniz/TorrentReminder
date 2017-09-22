@@ -37,8 +37,8 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
         return torrentSearchRepository.subscribeAllSearches()
     }
 
-    fun subscribeSearch(query: String): Flowable<TorrentSearch> {
-        return torrentSearchRepository.subscribeSearch(query)
+    fun subscribeSearch(id: String): Flowable<TorrentSearch> {
+        return torrentSearchRepository.subscribeSearch(id)
     }
 
 }
