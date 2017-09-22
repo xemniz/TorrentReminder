@@ -30,25 +30,24 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                     .equalTo(RealmTorrentSearch.ID, id)
                     .findFirst()
 
-            if (realmTorrentSearch != null) realmTorrentSearch.apply {
+            if (realmTorrentSearch != null) realmTorrentSearch.let { search ->
                 val newItems = dataList.map { TorrentItem(it, false) }
                         .map { it.toRealm() }
-                        .filter { newItem -> torrentItems.firstOrNull { oldItem -> oldItem.name == newItem.name } == null }
+                        .filter { newItem -> search.torrentItems.firstOrNull { oldItem -> oldItem.name == newItem.name } == null }
                 realm.executeTransaction {
-                    this.searchQuery = searchQuery
-                    this.torrentItems.addAll(newItems)
+                    search.searchQuery = searchQuery
+                    search.torrentItems.addAll(newItems)
                 }
             } else {
                 Log.d("RealmSearchRepository", "вызван метод update(), Итем не найден")
             }
-            Unit
         }
     }
 
-    override fun insert(name: String, dataList: List<TorrentData>) {
+    override fun insert(searchQuery: String, dataList: List<TorrentData>) {
         Realm.getDefaultInstance().use { realm ->
             val realmTorrentSearch = realm.where(RealmTorrentSearch::class.java)
-                    .equalTo(RealmTorrentSearch.ID, name)
+                    .equalTo(RealmTorrentSearch.SEARCHQUERY, searchQuery)
                     .findFirst()
 
             if (realmTorrentSearch == null)
@@ -60,12 +59,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                             })
                 }
             else
-                realmTorrentSearch.apply { ->
-                    val newItems = dataList.map { TorrentItem(it, false) }
-                            .map { it.toRealm() }
-                            .filter { newItem -> torrentItems.firstOrNull { oldItem -> oldItem.name == newItem.name } == null }
-                    realm.executeTransaction { torrentItems.addAll(newItems) }
-                }
+                Log.d("RealmSearchRepository", "вызван метод insert(), Итем с таким именем уже существует")
         }
     }
 
