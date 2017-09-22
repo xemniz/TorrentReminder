@@ -6,7 +6,7 @@ interface TorrentSearchRepository {
     fun delete(id: String)
     fun subscribeSearch(id: String): Flowable<TorrentSearch>
     fun subscribeAllSearches(): Flowable<List<TorrentSearch>>
-    fun insert(name: String, dataList: List<TorrentData>)
+    fun insert(searchQuery: String, dataList: List<TorrentData>)
     fun update(id: String, searchQuery: String, dataList: List<TorrentData>)
     fun checkAllItemsInSearchAsViewed(id: String)
 }

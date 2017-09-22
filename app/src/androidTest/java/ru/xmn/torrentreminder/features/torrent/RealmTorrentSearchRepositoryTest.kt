@@ -34,13 +34,16 @@ class RealmTorrentSearchRepositoryTest {
         realm.close()
     }
 
+
+    @UiThreadTest
     @Test
-    fun insertOrUpdate() {
+    fun insert() {
+        val realm = Realm.getDefaultInstance()
         searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
         Thread.sleep(1000)
         val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
         assertEquals(1, realmList.size)
-        assertEquals(TorrentSearch("searchQuery","searchQuery", listOf(
+        assertEquals(TorrentSearch("searchQuery", "searchQuery", listOf(
                 TorrentItem(TorrentData("1", "1"), false),
                 TorrentItem(TorrentData("2", "2"), false)
         )).lastSearchedItems, realmList[0].fromRealm().lastSearchedItems)
@@ -49,10 +52,18 @@ class RealmTorrentSearchRepositoryTest {
         realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
     }
 
+
+    @UiThreadTest
     @Test
     fun delete() {
+        val realm = Realm.getDefaultInstance()
+        val subscriber = TestSubscriber.create<List<TorrentSearch>>()
+        searchRepository.subscribeAllSearches().subscribe(subscriber)
         searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
-        searchRepository.delete("searchQuery")
+        subscriber.awaitCount(1)
+        val id = (subscriber.events[0][1] as List<TorrentSearch>)[0].id
+
+        searchRepository.delete(id)
 
         val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
         assertEquals(0, realmList.size)
@@ -70,15 +81,16 @@ class RealmTorrentSearchRepositoryTest {
         searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
         subscriber.awaitCount(1)
         val id = (subscriber.events[0][1] as List<TorrentSearch>)[0].id
+
         searchRepository.checkAllItemsInSearchAsViewed(id)
 
         val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
         assertEquals(1, realmList.size)
         assertEquals(
-                TorrentSearch(id,"searchQuery", listOf(
+                TorrentSearch(id, "searchQuery", listOf(
                         TorrentItem(TorrentData("1", "1"), true),
                         TorrentItem(TorrentData("2", "2"), true)
-                )).lastSearchedItems, realmList[0].fromRealm().lastSearchedItems)
+                )), realmList[0].fromRealm())
 
 
         searchRepository.update(id, "searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))
@@ -86,98 +98,13 @@ class RealmTorrentSearchRepositoryTest {
         val realmList2 = realm.where(RealmTorrentSearch::class.java).findAll()
         assertEquals(1, realmList2.size)
         assertEquals(
-                TorrentSearch("searchQuery","searchQuery", listOf(
+                TorrentSearch(id, "searchQuery", listOf(
                         TorrentItem(TorrentData("1", "1"), true),
                         TorrentItem(TorrentData("2", "2"), true),
                         TorrentItem(TorrentData("3", "3"), false)
-                )).lastSearchedItems, realmList[0].fromRealm().lastSearchedItems)
+                )), realmList[0].fromRealm())
 
         realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
 
-    }
-
-    @UiThreadTest
-    @Test
-    fun testSynchronize() {
-        val realm = Realm.getDefaultInstance()
-
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-
-        Handler().postDelayed({
-            val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
-            assertEquals(1, realmList.size)
-            assertEquals(
-                    TorrentSearch("searchQuery","searchQuery", listOf(
-                            TorrentItem(TorrentData("1", "1"), true),
-                            TorrentItem(TorrentData("2", "2"), true),
-                            TorrentItem(TorrentData("3", "3"), false)
-                    )).lastSearchedItems, realmList[0].fromRealm().lastSearchedItems)
-
-            realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
-
-        }, 1000)
-        Thread.sleep(1100)
-    }
-
-    @UiThreadTest
-    @Test
-    fun testSynchronizeStress() {
-        val realm = Realm.getDefaultInstance()
-
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-
-        Handler().postDelayed({
-            val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
-            assertEquals(1, realmList.size)
-            assertEquals(
-                    TorrentSearch("searchQuery","searchQuery", listOf(
-                            TorrentItem(TorrentData("1", "1"), true),
-                            TorrentItem(TorrentData("2", "2"), true),
-                            TorrentItem(TorrentData("3", "3"), true)
-                    )).lastSearchedItems, realmList[0].fromRealm().lastSearchedItems)
-
-            realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
-
-        }, 1000)
-        Thread.sleep(1100)
-    }
-
-    @UiThreadTest
-    @Test
-    fun testSynchronizeDelete() {
-        val realm = Realm.getDefaultInstance()
-
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))}
-        Handler().post{searchRepository.checkAllItemsInSearchAsViewed("searchQuery")}
-        Handler().post{searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2"), TorrentData("3", "3")))}
-        Handler().post{searchRepository.delete("searchQuery")}
-
-        Handler().postDelayed({
-            val realmList = realm.where(RealmTorrentSearch::class.java).findAll()
-            assertEquals(0, realmList.size)
-
-            realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
-
-        }, 1000)
-        Thread.sleep(1100)
     }
 }
