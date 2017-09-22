@@ -14,9 +14,9 @@ interface TorrentDataOwner {
     val torrentUrl:String
 }
 
-class JsoupTorrentSearcher(val documentProvider: (String) -> Document) : TorrentSearcher {
+class JsoupTorrentSearcher(val documentProvider: DocumentProvider) : TorrentSearcher {
     override fun searchTorrents(query: String): List<TorrentData> {
-        val doc = documentProvider(query)
+        val doc = documentProvider.provide(query)
         val newsHeadlines = doc.select("div#index")
                 .select("table")
                 .select("tbody")
@@ -32,6 +32,10 @@ class JsoupTorrentSearcher(val documentProvider: (String) -> Document) : Torrent
             return emptyList()
         }
     }
+}
+
+interface DocumentProvider{
+    fun provide(q: String): Document
 }
 
 
