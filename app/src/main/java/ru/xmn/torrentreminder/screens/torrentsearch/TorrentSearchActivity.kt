@@ -4,10 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.View
 import kotlinx.android.synthetic.main.torrent_list.*
-import kotlinx.android.synthetic.main.torrent_search_item.*
-import kotlinx.android.synthetic.main.torrent_search_item.view.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
 import ru.xmn.torrentreminder.screens.torrentsearch.searchlist.TorrentSearchAdapter
@@ -56,9 +53,9 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        torrentItemsList.adapter = TorrentSearchAdapter{
+        torrentItemsList.adapter = TorrentSearchAdapter({
             id, query -> torrentSearchViewModel.updateSearch(id, query)
-        }
+        }, { torrentSearchViewModel.deleteItem(it) })
     }
 
 }

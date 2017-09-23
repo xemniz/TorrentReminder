@@ -11,24 +11,23 @@ import ru.xmn.common.extensions.visible
 import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchViewModel
 import kotlin.properties.Delegates
 
-class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit) : RecyclerView.Adapter<TorrentSearchAdapter.ViewHolder>(), AutoUpdatableAdapter {
+class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TorrentSearchAdapter.ViewHolder>(), AutoUpdatableAdapter {
     var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
         autoNotify(oldValue, newValue) { a, b -> a.id == b.id }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart, deleteItem)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(parent.inflate(R.layout.torrent_search_item))
 
     override fun getItemCount() = items.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit) {
+        fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit) {
             with(itemView) {
-                torrentDeleteItem.setOnClickListener { TorrentSearchViewModel().deleteItem( torrentSearch.id ) }
+                torrentDeleteItem.setOnClickListener { deleteItem( torrentSearch.id ) }
                 torrentNameEditorButton.setOnClickListener { torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString()) }
                 torrentName.text = torrentSearch.searchQuery
                 torrentNameEditor.setText(torrentSearch.searchQuery)
