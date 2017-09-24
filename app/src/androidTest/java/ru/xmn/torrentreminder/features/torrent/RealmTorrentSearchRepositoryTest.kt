@@ -1,6 +1,5 @@
 package ru.xmn.torrentreminder.features.torrent
 
-import android.os.Handler
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
@@ -12,7 +11,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-
 
 @RunWith(AndroidJUnit4::class)
 class RealmTorrentSearchRepositoryTest {
@@ -57,11 +55,7 @@ class RealmTorrentSearchRepositoryTest {
     @Test
     fun delete() {
         val realm = Realm.getDefaultInstance()
-        val subscriber = TestSubscriber.create<List<TorrentSearch>>()
-        searchRepository.subscribeAllSearches().subscribe(subscriber)
-        searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
-        subscriber.awaitCount(1)
-        val id = (subscriber.events[0][1] as List<TorrentSearch>)[0].id
+        val id = insertOneSearch()
 
         searchRepository.delete(id)
 
@@ -76,11 +70,7 @@ class RealmTorrentSearchRepositoryTest {
     @Test
     fun checkAllAsViewed() {
         val realm = Realm.getDefaultInstance()
-        val subscriber = TestSubscriber.create<List<TorrentSearch>>()
-        searchRepository.subscribeAllSearches().subscribe(subscriber)
-        searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
-        subscriber.awaitCount(1)
-        val id = (subscriber.events[0][1] as List<TorrentSearch>)[0].id
+        val id = insertOneSearch()
 
         searchRepository.checkAllItemsInSearchAsViewed(id)
 
@@ -105,6 +95,47 @@ class RealmTorrentSearchRepositoryTest {
                 )), realmList[0].fromRealm())
 
         realm.executeTransaction { it.where(RealmTorrentSearch::class.java).findAll().deleteAllFromRealm() }
+    }
 
+    @UiThreadTest
+    @Test
+    fun testUpdateAll() {
+        //когда добавили один итем, получили событие
+        val subscribeAll = TestSubscriber.create<List<TorrentSearch>>()
+        searchRepository.subscribeAllSearches().subscribe(subscribeAll)
+        searchRepository.insert("searchQuery", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
+        subscribeAll.awaitCount(2)
+        val id = (subscribeAll.events[0][1] as List<TorrentSearch>)[0].id
+        assertEquals(1, searchRepository.searchAllChangeListeners.size)
+
+        //когда добавили второй итем и вторую подписку, получили событие и листенера стало два
+        val subscribeAll2 = TestSubscriber.create<List<TorrentSearch>>()
+        searchRepository.subscribeAllSearches().subscribe(subscribeAll2)
+        searchRepository.insert("searchQuery2", listOf(TorrentData("1", "1"), TorrentData("2", "2")))
+        subscribeAll2.awaitCount(2)
+        val id2 = (subscribeAll2.events[0][1] as List<TorrentSearch>)[1].id
+        assertEquals(2, searchRepository.searchAllChangeListeners.size)
+
+        subscribeAll.awaitCount(3)
+        assertEquals("searchQuery2",(subscribeAll.events[0][2] as List<TorrentSearch>)[1].searchQuery )
+
+        //когда отписались от одной из подписок, остался один листенер
+        subscribeAll2.dispose()
+        assertEquals(1, searchRepository.searchAllChangeListeners.size)
+
+        //удалили один из итемов, листенер жив
+        searchRepository.delete(id)
+
+        subscribeAll.awaitCount(4)
+        assertEquals("searchQuery2",(subscribeAll.events[0][3] as List<TorrentSearch>)[0].searchQuery )
+    }
+
+    private fun insertOneSearch(searchQuery: String = "searchQuery", dataList: List<TorrentData> = listOf(TorrentData("1", "1"), TorrentData("2", "2"))): String {
+        val subscribeAll = TestSubscriber.create<List<TorrentSearch>>()
+        searchRepository.subscribeAllSearches().subscribe(subscribeAll)
+        searchRepository.insert(searchQuery, dataList)
+        subscribeAll.awaitCount(1)
+        val id = (subscribeAll.events[0][1] as List<TorrentSearch>)[0].id
+        return id
     }
 }

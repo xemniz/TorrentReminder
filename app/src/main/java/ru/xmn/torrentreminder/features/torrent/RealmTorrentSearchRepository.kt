@@ -6,10 +6,11 @@ import io.reactivex.disposables.Disposables
 import io.realm.*
 import io.realm.annotations.PrimaryKey
 import java.util.*
+import kotlin.collections.ArrayList
 
 class RealmTorrentSearchRepository : TorrentSearchRepository {
-    lateinit var searchAllChangeListener: RealmChangeListener<RealmResults<RealmTorrentSearch>>
-    lateinit var oneSearchChangeListener: RealmChangeListener<RealmResults<RealmTorrentSearch>>
+    val searchAllChangeListeners: ArrayList<RealmChangeListener<RealmResults<RealmTorrentSearch>>> = ArrayList()
+    val oneSearchChangeListeners: ArrayList<RealmChangeListener<RealmResults<RealmTorrentSearch>>> = ArrayList()
 
     override fun delete(id: String) {
         Realm.getDefaultInstance().use {
@@ -79,7 +80,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
             val realmResults = realm.where(RealmTorrentSearch::class.java)
                     .equalTo(RealmTorrentSearch.ID, id)
                     .findAllAsync()
-            oneSearchChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
+            val listener: RealmChangeListener<RealmResults<RealmTorrentSearch>> = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
                 override fun onChange(results: RealmResults<RealmTorrentSearch>) {
                     if (results.isLoaded && !emitter.isCancelled) {
                         val search = results
@@ -89,10 +90,12 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                 }
 
             }
-            realmResults.addChangeListener(searchAllChangeListener)
+            oneSearchChangeListeners += listener
+            realmResults.addChangeListener(listener)
             emitter.setDisposable(Disposables.fromAction {
                 if (realmResults.isValid)
-                    realmResults.removeChangeListener(searchAllChangeListener)
+                    realmResults.removeChangeListener(listener)
+                oneSearchChangeListeners -= listener
                 realm.close()
             })
         }, BackpressureStrategy.LATEST)
@@ -106,20 +109,19 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
             val realm = Realm.getDefaultInstance()
             val realmResults = realm.where(RealmTorrentSearch::class.java).findAllAsync()
 
-            searchAllChangeListener = object : RealmChangeListener<RealmResults<RealmTorrentSearch>> {
-                override fun onChange(results: RealmResults<RealmTorrentSearch>) {
-                    if (results.isLoaded && !emitter.isCancelled) {
-                        val search = results
-                        if (!emitter.isCancelled)
-                            emitter.onNext(ArrayList(search))
-                    }
+            val listener: RealmChangeListener<RealmResults<RealmTorrentSearch>> = RealmChangeListener<RealmResults<RealmTorrentSearch>> { results ->
+                if (results.isLoaded && !emitter.isCancelled) {
+                    val search = results
+                    if (!emitter.isCancelled)
+                        emitter.onNext(ArrayList(search))
                 }
-
             }
-            realmResults.addChangeListener(searchAllChangeListener)
+            searchAllChangeListeners += listener
+            realmResults.addChangeListener(listener)
             emitter.setDisposable(Disposables.fromAction {
                 if (realmResults.isValid)
-                    realmResults.removeChangeListener(searchAllChangeListener)
+                    realmResults.removeChangeListener(listener)
+                searchAllChangeListeners -= listener
                 realm.close()
             })
         }, BackpressureStrategy.LATEST)
