@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import kotlinx.android.synthetic.main.torrent_list.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
@@ -28,13 +29,14 @@ class TorrentSearchActivity : AppCompatActivity() {
             when (it) {
                 is TorrentSearchState.Loading -> showLoading()
                 is TorrentSearchState.Success -> showValue(it.items)
-                is TorrentSearchState.Error -> showError()
+                is TorrentSearchState.Error -> showError(it.error)
+                is TorrentSearchState.UpdateComplete -> swipe_container.isRefreshing = !it.complete
             }
         })
     }
 
-    private fun showError() {
-
+    private fun showError( error: Throwable) {
+        Toast.makeText(applicationContext, error.message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showValue(items: List<TorrentSearch>) {

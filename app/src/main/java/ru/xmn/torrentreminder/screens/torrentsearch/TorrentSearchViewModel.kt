@@ -21,6 +21,7 @@ class TorrentSearchViewModel : ViewModel() {
                 .onErrorReturn { TorrentSearchState.Error(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { torrentItemsLiveData.value = it }
+        updateAllItems()
     }
 
     fun startCreateNewSearch() {
@@ -29,6 +30,18 @@ class TorrentSearchViewModel : ViewModel() {
 
     fun updateSearch(id:String, query: String) {
         torrentSearchUseCase.search(id, query)
+                .doOnError { TorrentSearchState.Error(it); torrentSearchUseCase.addEmptyItem() }
+                .subscribe { torrentSearchUseCase.torrentSearchRepository.update(id, query, it) }
+    }
+
+    fun updateAllItems(){
+        torrentSearchUseCase.updateItems()
+                .subscribe {
+                    for (item in it) {
+                        torrentSearchUseCase.search(item.id, item.searchQuery)
+                    }
+                    TorrentSearchState.UpdateComplete(true)
+                }
     }
 
     fun deleteItem(query: String){

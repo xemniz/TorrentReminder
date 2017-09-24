@@ -3,6 +3,7 @@ package ru.xmn.torrentreminder.features.torrent
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -17,10 +18,9 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe { }
     }
 
-    fun search(id: String, searchQuery: String) {
-        Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
+    fun search(id: String, searchQuery: String): Flowable<List<TorrentData>> {
+        return Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
                 .subscribeOn(Schedulers.io())
-                .subscribe { torrentSearchRepository.update(id, searchQuery, it) }
     }
 
     fun checkAllAsViewed(searchQuery: String) {
@@ -29,11 +29,10 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe()
     }
 
-    fun updateItems(){
-        subscribeAllSearches()
+    fun updateItems(): Maybe<List<TorrentSearch>> {
+        return subscribeAllSearches()
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .firstElement()
-                .subscribe { for (item in it) {search(item.id, item.searchQuery)} }
     }
 
     fun delete(query: String) {

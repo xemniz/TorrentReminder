@@ -7,6 +7,8 @@ sealed class TorrentSearchState {
 
     class Success(val items: List<TorrentSearch>) : TorrentSearchState()
 
+    class UpdateComplete(val complete: Boolean ) : TorrentSearchState()
+
     class Error(val error: Throwable) : TorrentSearchState(){
         init {
             error.printStackTrace()
