@@ -3,7 +3,9 @@ package ru.xmn.torrentreminder.screens.torrentsearch
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import ru.xmn.torrentreminder.application.App
+import ru.xmn.torrentreminder.features.torrent.TorrentSearch
 import ru.xmn.torrentreminder.features.torrent.TorrentSearchUseCase
 import javax.inject.Inject
 
@@ -11,40 +13,53 @@ class TorrentSearchViewModel : ViewModel() {
 
     @Inject
     lateinit var torrentSearchUseCase: TorrentSearchUseCase
-    val torrentItemsLiveData = MutableLiveData<TorrentSearchState>()
+    val torrentItemsLiveData = MutableLiveData<List<TorrentSearch>>()
+    val errorToastLiveData = MutableLiveData<ToastMsg>()
+    val showSwipeRefresh = MutableLiveData<Boolean>()
 
     init {
         App.component.torrentItemsComponent().provideModule(TorrentSearchModule()).build().inject(this)
         torrentSearchUseCase.subscribeAllSearches()
-                .map { TorrentSearchState.Success(it) as TorrentSearchState }
-                .startWith(TorrentSearchState.Loading)
-                .onErrorReturn { TorrentSearchState.Error(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { torrentItemsLiveData.value = it }
         updateAllItems()
     }
 
-    fun startCreateNewSearch() {
+    fun createNewSearch() {
         torrentSearchUseCase.addEmptyItem()
     }
 
-    fun updateSearch(id:String, query: String) {
-        torrentSearchUseCase.search(id, query)
-                .doOnError { TorrentSearchState.Error(it); torrentSearchUseCase.addEmptyItem() }
-                .subscribe { torrentSearchUseCase.torrentSearchRepository.update(id, query, it) }
+    fun updateSearch(id: String, query: String) {
+        torrentSearchUseCase.firstSearch(id, query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .onErrorComplete { errorToastLiveData.value = ToastMsg.UPDATING_ERROR; true }
+                .subscribe()
+
     }
 
-    fun updateAllItems(){
-        torrentSearchUseCase.updateItems()
-                .subscribe {
-                    for (item in it) {
-                        torrentSearchUseCase.search(item.id, item.searchQuery)
-                    }
-                    TorrentSearchState.UpdateComplete(true)
+    fun updateAllItems() {
+        torrentSearchUseCase
+                .updateItems()
+                .doOnSubscribe { showSwipeRefresh.value = true }
+                .observeOn(AndroidSchedulers.mainThread())
+                .onErrorComplete {
+                    errorToastLiveData.value = ToastMsg.UPDATING_ERROR
+                    showSwipeRefresh.value = false
+                    true
                 }
+                .subscribe { showSwipeRefresh.value = false }
     }
 
-    fun deleteItem(query: String){
+    fun deleteItem(query: String) {
         torrentSearchUseCase.delete(query)
     }
+
+    fun toastIsViewed() {
+        errorToastLiveData.value = ToastMsg.NOTHING
+    }
+}
+
+enum class ToastMsg {
+    NOTHING, UPDATING_ERROR
 }

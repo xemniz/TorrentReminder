@@ -3,8 +3,7 @@ package ru.xmn.torrentreminder.features.torrent
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Maybe
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -18,9 +17,13 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe { }
     }
 
-    fun search(id: String, searchQuery: String): Flowable<List<TorrentData>> {
+    fun firstSearch(id: String, searchQuery: String): Completable {
+        return search(id, searchQuery).doOnError { torrentSearchRepository.update(id, searchQuery, emptyList()) }
+    }
+
+    private fun search(id: String, searchQuery: String): Completable {
         return Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
-                .subscribeOn(Schedulers.io())
+                .flatMapCompletable { Completable.fromCallable { torrentSearchRepository.update(id, searchQuery, it) } }
     }
 
     fun checkAllAsViewed(searchQuery: String) {
@@ -29,10 +32,11 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe()
     }
 
-    fun updateItems(): Maybe<List<TorrentSearch>> {
+    fun updateItems(): Completable {
         return subscribeAllSearches()
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .firstElement()
+                .take(1)
+                .flatMap { Flowable.fromIterable(it) }
+                .flatMapCompletable { search(it.id, it.searchQuery) }
     }
 
     fun delete(query: String) {
@@ -49,4 +53,8 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
         return torrentSearchRepository.subscribeSearch(id)
     }
 
+}
+
+enum class UpdateItemsResult {
+    SUCCESS, ERROR
 }

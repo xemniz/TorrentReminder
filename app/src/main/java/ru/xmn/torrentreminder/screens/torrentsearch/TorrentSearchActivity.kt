@@ -12,38 +12,46 @@ import ru.xmn.torrentreminder.screens.torrentsearch.searchlist.TorrentSearchAdap
 
 
 class TorrentSearchActivity : AppCompatActivity() {
-    lateinit var torrentSearchViewModel: TorrentSearchViewModel
+    private lateinit var torrentSearchViewModel: TorrentSearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.torrent_list)
         setupToolbar()
-        setupClickListeners()
         setupViewModel()
+        setupClickListeners()
         setupRecyclerView()
     }
 
     private fun setupViewModel() {
-        torrentSearchViewModel = ViewModelProviders.of(this).get(TorrentSearchViewModel::class.java)
-        torrentSearchViewModel.torrentItemsLiveData.observe(this, Observer {
-            when (it) {
-                is TorrentSearchState.Loading -> showLoading()
-                is TorrentSearchState.Success -> showValue(it.items)
-                is TorrentSearchState.Error -> showError(it.error)
-                is TorrentSearchState.UpdateComplete -> swipe_container.isRefreshing = !it.complete
-            }
-        })
+        val torrentSearchActivity = this
+        torrentSearchViewModel = ViewModelProviders.of(torrentSearchActivity).get(TorrentSearchViewModel::class.java).apply {
+            torrentItemsLiveData.observe(torrentSearchActivity, Observer {
+                showValue(it ?: emptyList<TorrentSearch>())
+            })
+            errorToastLiveData.observe(torrentSearchActivity, Observer {
+                when (it) {
+                    ToastMsg.NOTHING -> {
+                    }
+                    ToastMsg.UPDATING_ERROR -> {
+                        showUpdatingError()
+                        torrentSearchViewModel.toastIsViewed()
+                    }
+                }
+            })
+            showSwipeRefresh.observe(torrentSearchActivity, Observer {
+                swipe_container.isRefreshing = it ?: false
+            })
+        }
+
     }
 
-    private fun showError( error: Throwable) {
-        Toast.makeText(applicationContext, error.message, Toast.LENGTH_SHORT).show()
+    private fun showUpdatingError() {
+        Toast.makeText(applicationContext, "Не удалось обновить поиск", Toast.LENGTH_SHORT).show()
     }
 
     private fun showValue(items: List<TorrentSearch>) {
         (torrentItemsList.adapter as TorrentSearchAdapter).items = items
-    }
-
-    private fun showLoading() {
     }
 
     private fun setupToolbar() {
@@ -51,12 +59,13 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        fab.setOnClickListener { torrentSearchViewModel.startCreateNewSearch() }
+        fab.setOnClickListener { torrentSearchViewModel.createNewSearch() }
+        swipe_container.setOnRefreshListener { torrentSearchViewModel.updateAllItems() }
     }
 
     private fun setupRecyclerView() {
-        torrentItemsList.adapter = TorrentSearchAdapter({
-            id, query -> torrentSearchViewModel.updateSearch(id, query)
+        torrentItemsList.adapter = TorrentSearchAdapter({ id, query ->
+            torrentSearchViewModel.updateSearch(id, query)
         }, { torrentSearchViewModel.deleteItem(it) })
     }
 
