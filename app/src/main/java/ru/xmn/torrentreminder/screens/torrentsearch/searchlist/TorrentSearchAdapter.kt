@@ -3,6 +3,7 @@ package ru.xmn.torrentreminder.screens.torrentsearch.searchlist
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.torrent_list.view.*
 import kotlinx.android.synthetic.main.torrent_search_item.view.*
 import ru.xmn.common.extensions.gone
 import ru.xmn.common.extensions.inflate
@@ -32,7 +33,7 @@ class TorrentSearchAdapter( val torrentSearchStart: (String, String) -> Unit, va
                 torrentName.text = torrentSearch.searchQuery
                 torrentNameEditor.setText(torrentSearch.searchQuery)
                 torrentUpdatedInfo.text = when (torrentSearch.hasUpdates) {
-                    true -> "Есть обновления"
+                    true -> "Есть обновления ${torrentSearch.lastSearchedItems.size}"
                     false -> "Обновлений нет"
                 }
 

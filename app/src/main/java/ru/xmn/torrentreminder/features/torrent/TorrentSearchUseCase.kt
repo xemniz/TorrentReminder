@@ -4,6 +4,7 @@ package ru.xmn.torrentreminder.features.torrent
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -52,10 +53,17 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 }
     }
 
-    fun delete(query: String) {
-        Completable.fromCallable { torrentSearchRepository.delete(query) }
+    fun delete(query: String): Completable {
+        return Completable.fromCallable { torrentSearchRepository.delete(query) }
                 .subscribeOn(Schedulers.io())
-                .subscribe()
+
+    }
+
+    fun isEmptyItem(): Flowable<TorrentSearch> {
+        return subscribeAllSearches()
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .take(1)
+                .flatMap { Flowable.fromIterable(it) }
     }
 
     fun subscribeAllSearches(): Flowable<List<TorrentSearch>> {

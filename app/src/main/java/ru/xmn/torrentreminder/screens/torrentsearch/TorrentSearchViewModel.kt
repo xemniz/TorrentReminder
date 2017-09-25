@@ -2,6 +2,7 @@ package ru.xmn.torrentreminder.screens.torrentsearch
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import ru.xmn.torrentreminder.application.App
@@ -17,6 +18,7 @@ class TorrentSearchViewModel : ViewModel() {
     val torrentItemsLiveData = MutableLiveData<List<TorrentSearch>>()
     val errorToastLiveData = MutableLiveData<ToastMsg>()
     val showSwipeRefresh = MutableLiveData<Boolean>()
+    val showFAB = MutableLiveData<Boolean>()
 
     init {
         App.component.torrentItemsComponent().provideModule(TorrentSearchModule()).build().inject(this)
@@ -28,6 +30,7 @@ class TorrentSearchViewModel : ViewModel() {
 
     fun createNewSearch() {
         torrentSearchUseCase.addEmptyItem()
+        showFAB.value = false
     }
 
     fun updateSearch(id: String, query: String) {
@@ -35,7 +38,7 @@ class TorrentSearchViewModel : ViewModel() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .onErrorComplete { errorToastLiveData.value = ToastMsg.UPDATING_ERROR; true }
-                .subscribe()
+                .subscribe{ isEmptyItem() }
 
     }
 
@@ -59,6 +62,11 @@ class TorrentSearchViewModel : ViewModel() {
 
     fun deleteItem(query: String) {
         torrentSearchUseCase.delete(query)
+                .subscribe{ isEmptyItem() }
+    }
+
+    fun isEmptyItem(){
+        torrentSearchUseCase.isEmptyItem().subscribe { showFAB.value = it.searchQuery != "" }
     }
 
     fun toastIsViewed() {

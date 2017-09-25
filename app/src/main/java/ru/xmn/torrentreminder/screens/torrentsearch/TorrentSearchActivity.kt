@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.torrent_list.*
+import ru.xmn.common.extensions.invisible
+import ru.xmn.common.extensions.visible
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
 import ru.xmn.torrentreminder.screens.torrentsearch.searchlist.TorrentSearchAdapter
@@ -21,6 +23,7 @@ class TorrentSearchActivity : AppCompatActivity() {
         setupViewModel()
         setupClickListeners()
         setupRecyclerView()
+        checkEmptyItem()
     }
 
     private fun setupViewModel() {
@@ -42,6 +45,12 @@ class TorrentSearchActivity : AppCompatActivity() {
             showSwipeRefresh.observe(torrentSearchActivity, Observer {
                 swipe_container.isRefreshing = it ?: false
             })
+            showFAB.observe(torrentSearchActivity, Observer {
+                 when(it){
+                     true -> fab.visible()
+                     false -> fab.invisible()
+                 }
+            })
         }
 
     }
@@ -51,7 +60,7 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun showValue(items: List<TorrentSearch>) {
-        (torrentItemsList.adapter as TorrentSearchAdapter).items = items
+        (torrentItemsList.adapter as TorrentSearchAdapter).items = items.asReversed()
     }
 
     private fun setupToolbar() {
@@ -59,8 +68,12 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        fab.setOnClickListener { torrentSearchViewModel.createNewSearch() }
+        fab.setOnClickListener { torrentSearchViewModel.createNewSearch(); fab.invisible() }
         swipe_container.setOnRefreshListener { torrentSearchViewModel.updateAllItems() }
+    }
+
+    private fun checkEmptyItem(){
+        torrentSearchViewModel.isEmptyItem()
     }
 
     private fun setupRecyclerView() {
