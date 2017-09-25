@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
 import ru.xmn.torrentreminder.features.torrent.TorrentSearchUseCase
+import ru.xmn.torrentreminder.features.torrent.UpdateItemsResult
 import javax.inject.Inject
 
 class TorrentSearchViewModel : ViewModel() {
@@ -30,7 +31,7 @@ class TorrentSearchViewModel : ViewModel() {
     }
 
     fun updateSearch(id: String, query: String) {
-        torrentSearchUseCase.firstSearch(id, query)
+        torrentSearchUseCase.firstSearchOnItem(id, query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .onErrorComplete { errorToastLiveData.value = ToastMsg.UPDATING_ERROR; true }
@@ -43,12 +44,17 @@ class TorrentSearchViewModel : ViewModel() {
                 .updateItems()
                 .doOnSubscribe { showSwipeRefresh.value = true }
                 .observeOn(AndroidSchedulers.mainThread())
-                .onErrorComplete {
-                    errorToastLiveData.value = ToastMsg.UPDATING_ERROR
+                .subscribe { result ->
                     showSwipeRefresh.value = false
-                    true
+                    when (result) {
+                        UpdateItemsResult.SUCCESS -> {
+                        }
+                        UpdateItemsResult.ERROR -> {
+                            errorToastLiveData.value = ToastMsg.UPDATING_ERROR
+                            showSwipeRefresh.value = false
+                        }
+                    }
                 }
-                .subscribe { showSwipeRefresh.value = false }
     }
 
     fun deleteItem(query: String) {

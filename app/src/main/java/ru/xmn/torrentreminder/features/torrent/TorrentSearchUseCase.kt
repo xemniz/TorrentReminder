@@ -17,13 +17,10 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe { }
     }
 
-    fun firstSearch(id: String, searchQuery: String): Completable {
-        return search(id, searchQuery).doOnError { torrentSearchRepository.update(id, searchQuery, emptyList()) }
-    }
-
-    private fun search(id: String, searchQuery: String): Completable {
+    fun firstSearchOnItem(id: String, searchQuery: String): Completable {
         return Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
                 .flatMapCompletable { Completable.fromCallable { torrentSearchRepository.update(id, searchQuery, it) } }
+                .doOnError { torrentSearchRepository.update(id, searchQuery, emptyList()) }
     }
 
     fun checkAllAsViewed(searchQuery: String) {
@@ -32,11 +29,27 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .subscribe()
     }
 
-    fun updateItems(): Completable {
+    fun updateItems(): Single<UpdateItemsResult> {
         return subscribeAllSearches()
                 .take(1)
                 .flatMap { Flowable.fromIterable(it) }
-                .flatMapCompletable { search(it.id, it.searchQuery) }
+                .flatMap { search ->
+                    Flowable.fromCallable { torrentSearcher.searchTorrents(search.searchQuery) }
+                            .flatMap { resultList ->
+                                torrentSearchRepository.update(search.id, search.searchQuery, resultList)
+                                Flowable.just(true)
+                            }
+                            .onErrorReturn { false }
+                            .subscribeOn(Schedulers.io())
+
+                }
+                .toList()
+                .map {
+                    when {
+                        it.contains(false) -> UpdateItemsResult.ERROR
+                        else -> UpdateItemsResult.SUCCESS
+                    }
+                }
     }
 
     fun delete(query: String) {
