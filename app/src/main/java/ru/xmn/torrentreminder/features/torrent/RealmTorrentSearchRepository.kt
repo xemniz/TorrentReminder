@@ -55,7 +55,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                 realm.executeTransaction {
                     it.copyToRealm(RealmTorrentSearch()
                             .apply {
-                                this.time = System.currentTimeMillis()
+                                this.createdAt = System.currentTimeMillis()
                                 this.searchQuery = searchQuery
                                 torrentItems = dataList.map { TorrentItem(it, false) }.map { it.toRealm() }.toRealmList()
                             })
@@ -108,7 +108,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
     override fun subscribeAllSearches(): Flowable<List<TorrentSearch>> {
         return Flowable.create(FlowableOnSubscribe<List<RealmTorrentSearch>> { emitter ->
             val realm = Realm.getDefaultInstance()
-            val realmResults = realm.where(RealmTorrentSearch::class.java).findAllAsync()
+            val realmResults = realm.where(RealmTorrentSearch::class.java).findAllSortedAsync(RealmTorrentSearch.CREATED_AT, Sort.DESCENDING)
 
             val listener: RealmChangeListener<RealmResults<RealmTorrentSearch>> = RealmChangeListener<RealmResults<RealmTorrentSearch>> { results ->
                 if (results.isLoaded && !emitter.isCancelled) {
@@ -145,7 +145,7 @@ fun TorrentItem.toRealm(): RealmTorrentItem {
 }
 
 fun RealmTorrentSearch.fromRealm(): TorrentSearch {
-    return TorrentSearch(this.time, this.id, this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
+    return TorrentSearch(this.createdAt, this.id, this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
 }
 
 fun RealmTorrentItem.fromRealm(): TorrentItem {
@@ -156,13 +156,14 @@ open class RealmTorrentSearch : RealmObject() {
     companion object {
         val ID = "id"
         val SEARCHQUERY = "searchQuery"
+        val CREATED_AT: String = "createdAt"
     }
 
     @PrimaryKey
     var id: String = UUID.randomUUID().toString()
     var searchQuery: String = ""
     var torrentItems: RealmList<RealmTorrentItem> = RealmList()
-    var time: Long = System.currentTimeMillis()
+    var createdAt: Long = System.currentTimeMillis()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

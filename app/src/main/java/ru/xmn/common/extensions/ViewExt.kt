@@ -1,9 +1,11 @@
 package ru.xmn.common.extensions
 
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
 import android.support.v4.view.ViewCompat
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 
 fun View.pairSharedTransition(): android.support.v4.util.Pair<View, String> {
     return android.support.v4.util.Pair<View, String>(this, ViewCompat.getTransitionName(this))
@@ -43,4 +45,14 @@ fun View.changeHeight(w: Int){
     val layoutParams = this.layoutParams
     layoutParams.height = w
     this.layoutParams = layoutParams
+}
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(windowToken, 0)
+}
+
+fun View.showKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.showSoftInput(this, 0)
 }

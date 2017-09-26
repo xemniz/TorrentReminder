@@ -27,10 +27,11 @@
         android:layout_marginTop="?attr/actionBarSize">
 
         <android.support.v7.widget.RecyclerView
+            android:focusableInTouchMode="true"
+            android:descendantFocusability="beforeDescendants"
             android:id="@+id/torrentItemsList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="LinearLayoutManager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </android.support.v4.widget.SwipeRefreshLayout>

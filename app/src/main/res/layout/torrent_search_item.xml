@@ -38,7 +38,7 @@
 
             <EditText
                 android:id="@+id/torrentNameEditor"
-                android:layout_width="248dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
                 android:hint="@string/torrent_search_hint"
@@ -48,8 +48,10 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/torrentNameEditorButton"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.576"
-                tools:text="sample text" />
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="sample text"
+                android:imeOptions="actionDone"
+                android:singleLine="true" />
 
             <ImageView
                 android:id="@+id/torrentNameEditorButton"
@@ -61,7 +63,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/torrentName"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.526"
                 app:srcCompat="@drawable/ic_done_black_24dp" />
 
             <TextView
