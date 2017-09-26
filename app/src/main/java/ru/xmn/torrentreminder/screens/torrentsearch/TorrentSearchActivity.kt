@@ -29,7 +29,11 @@ class TorrentSearchActivity : AppCompatActivity() {
     private fun setupViewModel() {
         val torrentSearchActivity = this
         torrentSearchViewModel = ViewModelProviders.of(torrentSearchActivity).get(TorrentSearchViewModel::class.java).apply {
-            torrentItemsLiveData.observe(torrentSearchActivity, Observer {
+            torrentItemsLiveData.observe(torrentSearchActivity, Observer { it ->
+                if (it?.isNotEmpty() == true)
+                    if (it.any{ it.searchQuery == "" }) fab.invisible() else fab.visible()
+                else fab.visible()
+
                 showValue(it ?: emptyList<TorrentSearch>())
             })
             errorToastLiveData.observe(torrentSearchActivity, Observer {
@@ -45,12 +49,6 @@ class TorrentSearchActivity : AppCompatActivity() {
             showSwipeRefresh.observe(torrentSearchActivity, Observer {
                 swipe_container.isRefreshing = it ?: false
             })
-            showFAB.observe(torrentSearchActivity, Observer {
-                 when(it){
-                     true -> fab.visible()
-                     false -> fab.invisible()
-                 }
-            })
         }
 
     }
@@ -60,7 +58,9 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun showValue(items: List<TorrentSearch>) {
-        (torrentItemsList.adapter as TorrentSearchAdapter).items = items.asReversed()
+        (torrentItemsList.adapter as TorrentSearchAdapter).items = items
+                .sortedBy { it.time }
+                .asReversed()//Новый итем всегда оказывается сверу
     }
 
     private fun setupToolbar() {
@@ -73,7 +73,7 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun checkEmptyItem(){
-        torrentSearchViewModel.isEmptyItem()
+
     }
 
     private fun setupRecyclerView() {

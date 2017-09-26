@@ -55,6 +55,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                 realm.executeTransaction {
                     it.copyToRealm(RealmTorrentSearch()
                             .apply {
+                                this.time = System.currentTimeMillis()
                                 this.searchQuery = searchQuery
                                 torrentItems = dataList.map { TorrentItem(it, false) }.map { it.toRealm() }.toRealmList()
                             })
@@ -144,7 +145,7 @@ fun TorrentItem.toRealm(): RealmTorrentItem {
 }
 
 fun RealmTorrentSearch.fromRealm(): TorrentSearch {
-    return TorrentSearch(this.id, this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
+    return TorrentSearch(this.time, this.id, this.searchQuery, ArrayList(this.torrentItems).map { it.fromRealm() })
 }
 
 fun RealmTorrentItem.fromRealm(): TorrentItem {
@@ -161,6 +162,7 @@ open class RealmTorrentSearch : RealmObject() {
     var id: String = UUID.randomUUID().toString()
     var searchQuery: String = ""
     var torrentItems: RealmList<RealmTorrentItem> = RealmList()
+    var time: Long = System.currentTimeMillis()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
