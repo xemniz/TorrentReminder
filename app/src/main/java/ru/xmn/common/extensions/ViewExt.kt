@@ -29,6 +29,12 @@ fun View.invisible() {
 fun View.gone() {
     this.visibility = View.GONE
 }
+fun List<View>.visibleOnly(vararg view: View) {
+    this.forEach {v ->  when{
+        view.any { it.id == v.id } -> v.visible()
+        else -> v.invisible()
+    } }
+}
 
 val Int.dp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()

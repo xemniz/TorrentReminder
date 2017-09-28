@@ -2,12 +2,14 @@ package ru.xmn.torrentreminder.screens.torrentsearch.searchlist
 
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.TextView
-import android.widget.TextView.OnEditorActionListener
 import kotlinx.android.synthetic.main.torrent_search_item.view.*
 import ru.xmn.common.extensions.*
 import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
@@ -28,17 +30,40 @@ class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val
     override fun getItemCount() = items.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        lateinit var views: List<View>
+
         fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit) {
             with(itemView) {
+                views = listOf(torrentNameEditor, torrentNameEditorButton, torrentName, torrentUpdatedInfo)
                 torrentDeleteItem.setOnClickListener {
                     deleteItem(torrentSearch.id)
                 }
-                torrentNameEditorButton.setOnClickListener {
-                    torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString())
+                when {
+                    torrentSearch.searchQuery == "" -> bindAsNewSearch(torrentSearch, torrentSearchStart)
+                    else -> bindAsCommonSearch(torrentSearch)
                 }
-                torrentName.text = torrentSearch.searchQuery
-                torrentNameEditor.setText(torrentSearch.searchQuery)
-                torrentNameEditor.setOnEditorActionListener(object : OnEditorActionListener {
+            }
+        }
+
+        private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch) {
+            views.visibleOnly(torrentName, torrentUpdatedInfo)
+            torrentUpdatedInfo.text = context.getString(R.string.item_updated_info, torrentSearch.lastSearchedItems.size, torrentSearch.lastSearchedItems.filter { !it.isViewed }.size)
+
+            torrentName.text = torrentSearch.searchQuery
+        }
+
+        private fun View.bindAsNewSearch(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit) {
+            views.visibleOnly(torrentNameEditor)
+            updateTorrentNameEditorButton()
+
+            torrentNameEditorButton.setOnClickListener {
+                torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString())
+                hideKeyboard()
+            }
+
+            torrentNameEditor.apply {
+                setText(torrentSearch.searchQuery)
+                setOnEditorActionListener(object : TextView.OnEditorActionListener {
                     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
                         if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
                             torrentSearchStart(torrentSearch.id, torrentNameEditor.text.toString())
@@ -47,40 +72,38 @@ class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val
                         return false
                     }
                 })
-                torrentNameEditor.onFocusChangeListener = object : View.OnFocusChangeListener {
+                addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(p0: Editable?) {}
+
+                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                        updateTorrentNameEditorButton()
+                    }
+
+                })
+                onFocusChangeListener = object : View.OnFocusChangeListener {
                     override fun onFocusChange(p0: View?, p1: Boolean) {
                         if (!p1)
                             hideKeyboard()
                     }
 
                 }
-                torrentUpdatedInfo.text = when (torrentSearch.hasUpdates) {
-                    true -> "Есть обновления ${torrentSearch.lastSearchedItems.size}"
-                    false -> "Обновлений нет"
-                }
+            }
 
-                when (torrentSearch.searchQuery == "") {
-                    true -> {
-                        torrentNameEditor.visible()
-                        torrentNameEditorButton.visible()
-                        torrentName.invisible()
-                        torrentUpdatedInfo.invisible()
+            //задержка нужна, чтобы ресайклер успел доскроллиться вверх.
+            Handler().postDelayed({
+                torrentNameEditor.isFocusable = true;
+                torrentNameEditor.isFocusableInTouchMode = true;
+                torrentNameEditor.requestFocus()
+                torrentNameEditor.showKeyboard()
+            }, 200)
+        }
 
-                        //задержка нужна, чтобы ресайклер успел доскроллиться вверх.
-                        Handler().postDelayed({
-                            torrentNameEditor.isFocusable = true;
-                            torrentNameEditor.isFocusableInTouchMode = true;
-                            torrentNameEditor.requestFocus()
-                            torrentNameEditor.showKeyboard()
-                        }, 200)
-                    }
-                    false -> {
-                        torrentName.visible()
-                        torrentNameEditorButton.invisible()
-                        torrentNameEditor.invisible()
-                        torrentUpdatedInfo.visible()
-                    }
-                }
+        private fun updateTorrentNameEditorButton() {
+            with(itemView){
+                if (torrentNameEditor.text.length > 2)
+                    torrentNameEditorButton.visible() else torrentNameEditorButton.invisible()
             }
         }
     }
