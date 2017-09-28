@@ -83,6 +83,7 @@ class TorrentSearchActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         setSupportActionBar(toolbar)
+        supportActionBar?.title = ""
     }
 
     private fun setupClickListeners() {
