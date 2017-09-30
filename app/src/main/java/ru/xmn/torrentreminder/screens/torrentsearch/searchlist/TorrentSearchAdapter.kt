@@ -1,5 +1,6 @@
 package ru.xmn.torrentreminder.screens.torrentsearch.searchlist
 
+import android.content.Intent
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
@@ -8,13 +9,13 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.TextView
 import kotlinx.android.synthetic.main.torrent_search_item.view.*
 import ru.xmn.common.extensions.*
 import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.TorrentSearch
+import ru.xmn.torrentreminder.screens.torrentsearch.torrentList.TorrentListActivity
 import kotlin.properties.Delegates
 
 
@@ -34,6 +35,12 @@ class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val
 
         fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit) {
             with(itemView) {
+                card_view.setOnClickListener {
+                    val intent = Intent(context, TorrentListActivity::class.java)
+                    intent.putExtra("query", torrentSearch.searchQuery)
+
+                    context.startActivity(intent)
+                }
                 views = listOf(torrentNameEditor, torrentNameEditorButton, torrentName, torrentUpdatedInfo)
                 torrentDeleteItem.setOnClickListener {
                     deleteItem(torrentSearch.id)
