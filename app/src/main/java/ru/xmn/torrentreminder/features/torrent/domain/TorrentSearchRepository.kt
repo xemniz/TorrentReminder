@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.features.torrent
+package ru.xmn.torrentreminder.features.torrent.domain
 
 import io.reactivex.Flowable
 

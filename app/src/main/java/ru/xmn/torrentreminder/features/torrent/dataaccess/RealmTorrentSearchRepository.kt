@@ -1,10 +1,14 @@
-package ru.xmn.torrentreminder.features.torrent
+package ru.xmn.torrentreminder.features.torrent.dataaccess
 
 import android.util.Log
 import io.reactivex.*
 import io.reactivex.disposables.Disposables
 import io.realm.*
 import io.realm.annotations.PrimaryKey
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearchRepository
 import java.util.*
 import kotlin.collections.ArrayList
 

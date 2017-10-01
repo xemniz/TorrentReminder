@@ -4,6 +4,9 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ru.xmn.torrentreminder.features.torrent.domain.DocumentProvider
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.searchers.JsoupTorrentSearcher
 
 class JsoupTorrentSearcherTest {
 

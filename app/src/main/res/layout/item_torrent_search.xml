@@ -9,81 +9,87 @@
     <android.support.v7.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="5dp"
-        app:contentPadding="10dp">
+        app:cardCornerRadius="2dp"
+        app:cardElevation="2dp"
+        app:contentPadding="8dp"
+        android:foreground="?android:selectableItemBackground">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="8dp">
 
             <TextView
                 android:id="@+id/torrentName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textSize="33sp"
+                android:fontFamily="@font/play"
+                android:textAlignment="viewStart"
+                android:textSize="24sp"
                 app:layout_constraintBottom_toTopOf="@id/torrentUpdatedInfo"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="sample text"
-                tools:visibility="invisible" />
+                tools:visibility="visible"
+                android:layout_marginBottom="16dp"/>
 
             <EditText
                 android:id="@+id/torrentNameEditor"
-                android:layout_width="248dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
-                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/play"
                 android:hint="@string/torrent_search_hint"
-                android:textAlignment="center"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:textAlignment="viewStart"
                 android:textSize="18sp"
-                android:visibility="visible"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/torrentNameEditorButton"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.576"
                 tools:text="sample text" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/torrentNameEditorButton"
-                android:layout_width="40dp"
-                android:layout_height="41dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="96dp"
-                android:layout_marginTop="8dp"
+                style="@style/Widget.AppCompat.Toolbar.Button.Navigation"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:tint="@color/approveGreen"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/torrentName"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:srcCompat="@drawable/ic_done_black_24dp"
+                tools:visibility="invisible"/>
+
+            <ImageButton
+                android:id="@+id/torrentDeleteItem"
+                style="@style/Widget.AppCompat.Toolbar.Button.Navigation"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.526"
-                app:srcCompat="@drawable/ic_done_black_24dp" />
+                app:srcCompat="@drawable/ic_clear_black_24dp" />
 
             <TextView
                 android:id="@+id/torrentUpdatedInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
+                android:fontFamily="@font/play"
+                android:textAlignment="viewStart"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 tools:text="sample text"
-                tools:visibility="invisible" />
-
-            <ImageView
-                android:id="@+id/torrentDeleteItem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_clear_black_24dp" />
+                tools:visibility="visible" />
 
         </android.support.constraint.ConstraintLayout>
 

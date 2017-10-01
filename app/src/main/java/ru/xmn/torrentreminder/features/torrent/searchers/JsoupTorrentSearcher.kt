@@ -1,18 +1,8 @@
-package ru.xmn.torrentreminder.features.torrent
+package ru.xmn.torrentreminder.features.torrent.searchers
 
-import org.jsoup.nodes.Document
-
-
-interface TorrentSearcher {
-    fun searchTorrents(query: String): List<TorrentData>
-}
-
-data class TorrentData(override val name: String, override val torrentUrl: String): TorrentDataOwner
-
-interface TorrentDataOwner {
-    val name:String
-    val torrentUrl:String
-}
+import ru.xmn.torrentreminder.features.torrent.domain.DocumentProvider
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearcher
 
 class JsoupTorrentSearcher(val documentProvider: DocumentProvider) : TorrentSearcher {
     override fun searchTorrents(query: String): List<TorrentData> {
@@ -32,10 +22,5 @@ class JsoupTorrentSearcher(val documentProvider: DocumentProvider) : TorrentSear
             return emptyList()
         }
     }
+
 }
-
-interface DocumentProvider{
-    fun provide(q: String): Document
-}
-
-

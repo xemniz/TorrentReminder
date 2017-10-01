@@ -11,6 +11,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.xmn.torrentreminder.features.torrent.dataaccess.RealmTorrentSearch
+import ru.xmn.torrentreminder.features.torrent.dataaccess.RealmTorrentSearchRepository
+import ru.xmn.torrentreminder.features.torrent.dataaccess.fromRealm
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 
 @RunWith(AndroidJUnit4::class)
 class RealmTorrentSearchRepositoryTest {

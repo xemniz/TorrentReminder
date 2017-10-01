@@ -10,18 +10,19 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import kotlinx.android.synthetic.main.torrent_list.*
+import kotlinx.android.synthetic.main.activity_torrent_search_list.*
+import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.torrentreminder.R
-import ru.xmn.torrentreminder.features.torrent.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentsearch.searchlist.TorrentSearchAdapter
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
+import ru.xmn.torrentreminder.screens.torrentsearch.searchlist.TorrentSearchListAdapter
 
 
-class TorrentSearchActivity : AppCompatActivity() {
+class TorrentSearchListActivity : AppCompatActivity() {
     private lateinit var torrentSearchViewModel: TorrentSearchViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.torrent_list)
+        setContentView(R.layout.activity_torrent_search_list)
         setupToolbar()
         setupViewModel()
         setupClickListeners()
@@ -55,7 +56,7 @@ class TorrentSearchActivity : AppCompatActivity() {
     }
 
     private fun showValue(items: List<TorrentSearch>) {
-        (torrentItemsList.adapter as TorrentSearchAdapter).items = items
+        (torrentItemsList.adapter as TorrentSearchListAdapter).items = items
         updateScreen(items.any { it.searchQuery == "" })
     }
 
@@ -95,7 +96,7 @@ class TorrentSearchActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         torrentItemsList.apply {
-            layoutManager = object : LinearLayoutManager(this@TorrentSearchActivity) {
+            layoutManager = object : LinearLayoutManager(this@TorrentSearchListActivity) {
                 override fun onRequestChildFocus(parent: RecyclerView?, state: RecyclerView.State?, child: View?, focused: View?): Boolean {
                     return true
                 }
@@ -104,8 +105,8 @@ class TorrentSearchActivity : AppCompatActivity() {
                     return focused
                 }
             }
-            adapter = TorrentSearchAdapter({ id, query ->
-                torrentSearchViewModel.updateSearch(id, query)
+            adapter = TorrentSearchListAdapter({ id, query ->
+                torrentSearchViewModel.firstSearchOnItem(id, query)
             }, { torrentSearchViewModel.deleteItem(it) })
         }
     }

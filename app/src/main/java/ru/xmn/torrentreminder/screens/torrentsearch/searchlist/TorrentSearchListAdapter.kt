@@ -1,6 +1,6 @@
 package ru.xmn.torrentreminder.screens.torrentsearch.searchlist
 
-import android.content.Intent
+import org.jetbrains.anko.*
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
@@ -10,23 +10,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import kotlinx.android.synthetic.main.torrent_search_item.view.*
+import kotlinx.android.synthetic.main.item_torrent_search.view.*
 import ru.xmn.common.extensions.*
 import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
-import ru.xmn.torrentreminder.features.torrent.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentsearch.torrentList.TorrentListActivity
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
+import ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity
 import kotlin.properties.Delegates
 
 
-class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TorrentSearchAdapter.ViewHolder>(), AutoUpdatableAdapter {
+class TorrentSearchListAdapter(val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TorrentSearchListAdapter.ViewHolder>(), AutoUpdatableAdapter {
     var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
         autoNotify(oldValue, newValue) { a, b -> a.id == b.id }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart, deleteItem)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(parent.inflate(R.layout.torrent_search_item))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(parent.inflate(R.layout.item_torrent_search))
 
     override fun getItemCount() = items.size
 
@@ -35,12 +35,6 @@ class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val
 
         fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit) {
             with(itemView) {
-                card_view.setOnClickListener {
-                    val intent = Intent(context, TorrentListActivity::class.java)
-                    intent.putExtra("query", torrentSearch.searchQuery)
-
-                    context.startActivity(intent)
-                }
                 views = listOf(torrentNameEditor, torrentNameEditorButton, torrentName, torrentUpdatedInfo)
                 torrentDeleteItem.setOnClickListener {
                     deleteItem(torrentSearch.id)
@@ -53,6 +47,9 @@ class TorrentSearchAdapter(val torrentSearchStart: (String, String) -> Unit, val
         }
 
         private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch) {
+            card_view.setOnClickListener {
+                context.startActivity<TorrentListActivity>(TorrentListActivity.ID to torrentSearch.id)
+            }
             views.visibleOnly(torrentName, torrentUpdatedInfo)
             torrentUpdatedInfo.text = context.getString(R.string.item_updated_info, torrentSearch.lastSearchedItems.size, torrentSearch.lastSearchedItems.filter { !it.isViewed }.size)
 

@@ -1,0 +1,24 @@
+<android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?android:actionBarSize"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_marginTop="6dp"
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/oswald"
+            android:includeFontPadding="false"
+            android:text="@string/app_name"
+            android:textColor="@android:color/black"
+            android:textSize="26sp"
+            tools:text="тарантино"/>
+    </FrameLayout>
+
+</android.support.v7.widget.Toolbar>

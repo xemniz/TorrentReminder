@@ -1,10 +1,13 @@
-package ru.xmn.torrentreminder.features.torrent
+package ru.xmn.torrentreminder.features.torrent.domain.usecases
 
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearchRepository
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearcher
 import javax.inject.Inject
 
 class TorrentSearchUseCase

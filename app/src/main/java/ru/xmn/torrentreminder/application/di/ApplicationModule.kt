@@ -4,12 +4,12 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import ru.xmn.torrentreminder.application.App
-import ru.xmn.torrentreminder.features.torrent.RealmTorrentSearchRepository
-import ru.xmn.torrentreminder.features.torrent.TorrentSearchRepository
-import ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchComponent
+import ru.xmn.torrentreminder.features.torrent.dataaccess.RealmTorrentSearchRepository
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearchRepository
+import ru.xmn.torrentreminder.features.torrent.di.TorrentComponent
 import javax.inject.Singleton
 
-@Module(subcomponents = arrayOf(TorrentSearchComponent::class))
+@Module(subcomponents = arrayOf(TorrentComponent::class))
 class ApplicationModule(private val app: App) {
     @Provides
     @Singleton

@@ -11,14 +11,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchActivity"
+            android:name="ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".screens.torrentsearch.torrentList.TorrentListActivity" />
+        <activity
+            android:name="ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

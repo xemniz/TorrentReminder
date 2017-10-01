@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.features.torrent
+package ru.xmn.torrentreminder.features.torrent.domain
 
 data class TorrentItem(private val item: TorrentData, val isViewed: Boolean) : TorrentDataOwner by item {
     constructor(name: String, torrentUrl: String, isViewed: Boolean) : this(TorrentData(name, torrentUrl), isViewed)
