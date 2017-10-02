@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.searchlist
+package ru.xmn.torrentreminder.screens.torrentsearch.adapters
 
 import org.jetbrains.anko.*
 import android.os.Handler
@@ -19,7 +19,7 @@ import ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity
 import kotlin.properties.Delegates
 
 
-class TorrentSearchListAdapter(val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TorrentSearchListAdapter.ViewHolder>(), AutoUpdatableAdapter {
+class TrackFragmentAdapter(val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TrackFragmentAdapter.ViewHolder>(), AutoUpdatableAdapter {
     var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
         autoNotify(oldValue, newValue) { a, b -> a.id == b.id }
     }
