@@ -11,10 +11,6 @@ import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
 import kotlin.properties.Delegates
 
-/**
- * Created by Michael on 27.09.2017.
- *
- */
 class TorrentListAdapter(val torrentDownload: (String) -> Unit): RecyclerView.Adapter<TorrentListAdapter.ViewHolder>(), AutoUpdatableAdapter {
 
     var items by Delegates.observable(emptyList<TorrentItem>()){

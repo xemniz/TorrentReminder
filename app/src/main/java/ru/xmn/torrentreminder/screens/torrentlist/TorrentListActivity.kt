@@ -13,10 +13,6 @@ import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
 
-/**
- * Created by Michael on 27.09.2017.
- *
- */
 class TorrentListActivity : AppCompatActivity() {
 
     companion object {

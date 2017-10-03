@@ -19,10 +19,6 @@ import ru.xmn.torrentreminder.screens.torrentsearch.ToastMsg
 import ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchViewModel
 import ru.xmn.torrentreminder.screens.torrentsearch.adapters.TrackFragmentAdapter
 
-/**
- * Created by Michael on 02.10.2017.
- *
- */
 class TorrentTrackFragment: android.support.v4.app.Fragment() {
 
     private lateinit var trackFragmentViewModel: TorrentSearchViewModel

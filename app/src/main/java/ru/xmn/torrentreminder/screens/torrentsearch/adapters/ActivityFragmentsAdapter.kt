@@ -6,14 +6,11 @@ import android.support.v4.app.FragmentPagerAdapter
 import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentSearchFragment
 import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentTrackFragment
 
-/**
- * Created by Michael on 02.10.2017.
- */
 class ActivityFragmentsAdapter(manager: FragmentManager) : FragmentPagerAdapter(manager) {
 
 
     val fragmentList = listOf<Fragment>(TorrentSearchFragment(), TorrentTrackFragment())
-    val fragmentTitleList = listOf<String>("Поиск","NoName")
+    val fragmentTitleList = listOf<String>("Поиск","Сохраненные поиски")
 
 
     override fun getItem(position: Int): Fragment {

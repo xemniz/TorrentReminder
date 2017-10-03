@@ -10,10 +10,6 @@ import ru.xmn.torrentreminder.features.torrent.domain.usecases.TorrentListUseCas
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 import javax.inject.Inject
 
-/**
- * Created by Michael on 29.09.2017.
- *
- */
 class TorrentListViewModule(val id: String) : ViewModel() {
 
     @Inject
