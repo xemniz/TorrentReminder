@@ -12,7 +12,6 @@ class TorrentListUseCase
 @Inject
 constructor(val torrentSearcher: TorrentSearcher, val torrentListRepository: TorrentSearchRepository) {
 
-
     fun getTorrentList(id: String): Flowable<TorrentSearch> {
         return torrentListRepository.subscribeSearch(id)
     }
@@ -25,7 +24,7 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentListRepository: Tor
                 .flatMap { search ->
                     Flowable
                             .fromCallable { torrentSearcher.searchTorrents(search.searchQuery) }
-                            .map{Pair(search, it)}
+                            .map { Pair(search, it) }
                             .subscribeOn(Schedulers.io())
                 }
                 .flatMapCompletable { Completable.fromCallable { torrentListRepository.update(it.first.id, it.first.searchQuery, it.second) } }

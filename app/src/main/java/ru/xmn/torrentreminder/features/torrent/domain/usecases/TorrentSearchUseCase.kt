@@ -17,7 +17,7 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
     fun addEmptyItem() {
         Completable.fromCallable { torrentSearchRepository.insert("", emptyList()) }
                 .subscribeOn(Schedulers.io())
-                .subscribe { }
+                .subscribe()
     }
 
     fun firstSearchOnItem(id: String, searchQuery: String): Completable {

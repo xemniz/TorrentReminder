@@ -11,8 +11,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
+import jp.wasabeef.recyclerview.animators.FadeInDownAnimator
 import kotlinx.android.synthetic.main.fragment_torrent_track.*
 import kotlinx.android.synthetic.main.fragment_torrent_track.view.*
 import ru.xmn.torrentreminder.R
@@ -38,6 +37,7 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
         val torrentSearchActivity = this
         trackFragmentViewModel = ViewModelProviders.of(torrentSearchActivity).get(TorrentSearchViewModel::class.java).apply {
             torrentItemsLiveData.observe(torrentSearchActivity, Observer {
+                torrentItemsList.smoothScrollToPosition(0)
                 showValue(it!!)
             })
             errorToastLiveData.observe(torrentSearchActivity, Observer {
@@ -109,7 +109,7 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
             adapter = TrackFragmentAdapter({ id, query ->
                 trackFragmentViewModel.firstSearchOnItem(id, query)
             }, { trackFragmentViewModel.deleteItem(it) })
-            itemAnimator = SlideInDownAnimator()
+            itemAnimator = FadeInDownAnimator()
         }
     }
 

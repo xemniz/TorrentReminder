@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.SearchView
+import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.android.synthetic.main.fragment_torrent_search.*
@@ -102,7 +103,7 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
             adapter = SearchFragmentAdapter { uri -> downloadTorrent(uri) }
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             setOnTouchListener { view, motionEvent -> torrent_searched_list.hideKeyboard(); false }
-            itemAnimator = SlideInUpAnimator()
+            itemAnimator = FadeInUpAnimator()
         }
     }
 

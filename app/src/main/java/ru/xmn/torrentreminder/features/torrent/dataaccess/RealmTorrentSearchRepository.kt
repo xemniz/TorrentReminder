@@ -49,7 +49,8 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
         }
     }
 
-    override fun insert(searchQuery: String, dataList: List<TorrentData>) {
+    override fun insert(searchQuery: String, dataList: List<TorrentData>): String {
+        var id = ""
         Realm.getDefaultInstance().use { realm ->
             val realmTorrentSearch = realm.where(RealmTorrentSearch::class.java)
                     .equalTo(RealmTorrentSearch.SEARCHQUERY, searchQuery)
@@ -57,15 +58,21 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
 
             if (realmTorrentSearch == null)
                 realm.executeTransaction {
-                    it.copyToRealm(RealmTorrentSearch()
+                    val search = RealmTorrentSearch()
+                    id = search.id
+                    it.copyToRealm(search
                             .apply {
                                 this.createdAt = System.currentTimeMillis()
                                 this.searchQuery = searchQuery
                                 torrentItems = dataList.map { TorrentItem(it, false) }.map { it.toRealm() }.toRealmList()
                             })
                 }
-            else
+            else {
                 Log.d("RealmSearchRepository", "вызван метод insert(), Итем с таким именем уже существует")
+                id = realmTorrentSearch.id
+            }
+
+            return id
         }
     }
 
