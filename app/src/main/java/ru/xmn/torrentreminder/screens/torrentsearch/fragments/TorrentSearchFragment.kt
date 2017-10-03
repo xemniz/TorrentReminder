@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.support.transition.TransitionManager
 import android.support.v7.widget.DividerItemDecoration
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,8 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.SearchView
+import jp.wasabeef.recyclerview.animators.SlideInDownAnimator
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 import kotlinx.android.synthetic.main.fragment_torrent_search.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.common.extensions.visibleOnly
@@ -31,7 +34,7 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
         setupViewModel()
         setupClickListener()
         setupRecyclerView()
-        }
+    }
 
     private fun setupViewModel() {
         searchFragmentViewModel = ViewModelProviders
@@ -41,9 +44,7 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
                     torrentListLiveData.observe(this@TorrentSearchFragment, Observer {
                         showState(it!!)
                     })
-                    searchQueryLiveData.observe(this@TorrentSearchFragment, Observer {
-                        torrent_search_view.setQuery(it!!, false)
-                    })
+                    torrent_search_view.setQuery(searchQueryLiveData.value, false)
                     saveButtonShow.observe(this@TorrentSearchFragment, Observer {
                         updateScreen(it!!)
                     })
@@ -70,6 +71,7 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
 
     private fun showState(state: SearchState) {
         val layouts = listOf<View>(error_layout, empty_search_layout, start_search_layout, torrent_searched_list, progress)
+        TransitionManager.beginDelayedTransition(container)
         when (state) {
             is SearchState.StartNewSearch -> {
                 layouts.visibleOnly(start_search_layout)
@@ -100,6 +102,7 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
             adapter = SearchFragmentAdapter { uri -> downloadTorrent(uri) }
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             setOnTouchListener { view, motionEvent -> torrent_searched_list.hideKeyboard(); false }
+            itemAnimator = SlideInUpAnimator()
         }
     }
 
@@ -108,7 +111,6 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
         val intent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(intent)
     }
-
 
 
     private fun updateScreen(showButtonSave: Boolean) {

@@ -49,8 +49,6 @@ class SearchFragmentViewModel : ViewModel() {
                 .subscribe {
                     saveButtonShow.value = it
                 }
-
-        searchQueryLiveData.value = searchQuerySubject.value ?: ""
     }
 
     fun addNewItem(searchQuery: String) {
