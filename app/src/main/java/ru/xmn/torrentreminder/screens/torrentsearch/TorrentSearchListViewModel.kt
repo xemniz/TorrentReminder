@@ -25,6 +25,7 @@ class TorrentSearchViewModel : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { torrentItemsLiveData.value = it }
         updateAllItems()
+        torrentSearchUseCase.deleteNewSearch()
     }
 
     fun createNewSearch() {
@@ -56,12 +57,16 @@ class TorrentSearchViewModel : ViewModel() {
                 }
     }
 
-    fun deleteItem(query: String) {
-        torrentSearchUseCase.delete(query)
+    fun deleteItem(id: String) {
+        torrentSearchUseCase.delete(id)
     }
 
     fun toastIsViewed() {
         errorToastLiveData.value = ToastMsg.NOTHING
+    }
+
+    fun deleteNewSearch() {
+        torrentSearchUseCase.deleteNewSearch()
     }
 }
 

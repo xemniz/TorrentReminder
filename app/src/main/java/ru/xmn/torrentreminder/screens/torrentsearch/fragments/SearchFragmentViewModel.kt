@@ -22,7 +22,7 @@ class SearchFragmentViewModel : ViewModel() {
     val torrentListLiveData = MutableLiveData<SearchState>()
     val saveButtonShow = MutableLiveData<Boolean>()
     val searchQueryLiveData = MutableLiveData<String>()
-    val searchQuerySubject: BehaviorProcessor<String> = BehaviorProcessor.create()
+    private val searchQuerySubject: BehaviorProcessor<String> = BehaviorProcessor.create()
 
     init {
         App.component.torrentItemsComponent()
@@ -49,6 +49,8 @@ class SearchFragmentViewModel : ViewModel() {
                 .subscribe {
                     saveButtonShow.value = it
                 }
+
+        searchQuerySubject.onNext("")
     }
 
     fun addNewItem(searchQuery: String) {
@@ -71,7 +73,6 @@ class SearchFragmentViewModel : ViewModel() {
                 .startWith(SearchState.Loading)
         else -> Flowable.just(SearchState.StartNewSearch)
     }
-
 }
 
 

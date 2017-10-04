@@ -116,4 +116,8 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
         }
     }
 
+    fun deleteNewSearch() {
+        trackFragmentViewModel.deleteNewSearch()
+    }
+
 }

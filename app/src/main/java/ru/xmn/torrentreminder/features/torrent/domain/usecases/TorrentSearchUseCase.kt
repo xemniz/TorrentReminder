@@ -26,12 +26,6 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .doOnError { torrentSearchRepository.update(id, searchQuery, emptyList()) }
     }
 
-    fun checkAllAsViewed(searchQuery: String) {
-        Completable.fromCallable { torrentSearchRepository.checkAllItemsInSearchAsViewed(searchQuery) }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
-    }
-
     fun updateItems(): Single<UpdateItemsResult> {
         return subscribeAllSearches()
                 .take(1)
@@ -55,8 +49,8 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 }
     }
 
-    fun delete(query: String) {
-        Completable.fromCallable { torrentSearchRepository.delete(query) }
+    fun delete(id: String) {
+        Completable.fromCallable { torrentSearchRepository.delete(id) }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
     }
@@ -65,10 +59,16 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
         return torrentSearchRepository.subscribeAllSearches()
     }
 
-    fun subscribeSearch(id: String): Flowable<TorrentSearch> {
-        return torrentSearchRepository.subscribeSearch(id)
+    fun deleteNewSearch() {
+        torrentSearchRepository
+                .subscribeAllSearches()
+                .take(1)
+                .observeOn(Schedulers.io())
+                .flatMap { Flowable.fromIterable(it) }
+                .filter { it.searchQuery == "" }
+                .flatMapCompletable { Completable.fromCallable { torrentSearchRepository.delete(it.id) } }
+                .subscribe()
     }
-
 }
 
 enum class UpdateItemsResult {

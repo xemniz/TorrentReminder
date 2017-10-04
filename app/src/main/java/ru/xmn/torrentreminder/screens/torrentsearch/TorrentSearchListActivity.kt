@@ -1,6 +1,7 @@
 package ru.xmn.torrentreminder.screens.torrentsearch
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.view.ViewPager
@@ -29,7 +30,8 @@ class TorrentSearchListActivity : AppCompatActivity() {
     }
 
     private fun setupViewPager() {
-        val adapter = ActivityFragmentsAdapter(supportFragmentManager, listOf<Fragment>(TorrentSearchFragment(), TorrentTrackFragment()), listOf<String>("Поиск", "Сохраненные поиски"))
+        val fragmentList = listOf<Fragment>(TorrentSearchFragment(), TorrentTrackFragment())
+        val adapter = ActivityFragmentsAdapter(supportFragmentManager, fragmentList, listOf<String>("Поиск", "Сохраненные поиски"))
         viewPager.adapter = adapter
         tabs.setupWithViewPager(viewPager)
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -42,6 +44,9 @@ class TorrentSearchListActivity : AppCompatActivity() {
 
             override fun onPageSelected(position: Int) {
                 viewPager.hideKeyboard()
+                val currentFragment = fragmentList[position]
+                if (currentFragment !is TorrentTrackFragment)
+                    Handler().postDelayed({fragmentList.filterIsInstance(TorrentTrackFragment::class.java).first().deleteNewSearch()}, 300)
             }
 
         })
