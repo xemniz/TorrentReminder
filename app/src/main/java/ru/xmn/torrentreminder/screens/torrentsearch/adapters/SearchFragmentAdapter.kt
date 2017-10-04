@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_torrent.view.*
 import ru.xmn.common.extensions.inflate
-import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
+import ru.xmn.common.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
 import kotlin.properties.Delegates

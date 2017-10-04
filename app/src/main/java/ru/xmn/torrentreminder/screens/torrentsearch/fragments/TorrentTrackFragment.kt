@@ -37,7 +37,6 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
         val torrentSearchActivity = this
         trackFragmentViewModel = ViewModelProviders.of(torrentSearchActivity).get(TorrentSearchViewModel::class.java).apply {
             torrentItemsLiveData.observe(torrentSearchActivity, Observer {
-                torrentItemsList.smoothScrollToPosition(0)
                 showValue(it!!)
             })
             errorToastLiveData.observe(torrentSearchActivity, Observer {
@@ -66,9 +65,6 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
     }
 
     private fun updateScreen(hasNewItem: Boolean) {
-        if (hasNewItem)
-            torrentItemsList.smoothScrollToPosition(0)
-
         val hided = fab.translationX > 0f
 
         val needToHide = hasNewItem && !hided
@@ -106,9 +102,16 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
                     return focused
                 }
             }
-            adapter = TrackFragmentAdapter({ id, query ->
-                trackFragmentViewModel.firstSearchOnItem(id, query)
-            }, { trackFragmentViewModel.deleteItem(it) })
+            adapter = TrackFragmentAdapter(
+                    torrentSearchStart = { id, query ->
+                        trackFragmentViewModel.firstSearchOnItem(id, query)
+                    },
+                    deleteItem = {
+                        trackFragmentViewModel.deleteItem(it)
+                    },
+                    onInsertedAction = { position, _ ->
+                        torrentItemsList.smoothScrollToPosition(position)
+                    })
             itemAnimator = FadeInDownAnimator()
         }
     }

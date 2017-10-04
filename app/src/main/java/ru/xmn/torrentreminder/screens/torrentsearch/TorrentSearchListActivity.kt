@@ -1,6 +1,7 @@
 package ru.xmn.torrentreminder.screens.torrentsearch
 
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
@@ -9,6 +10,8 @@ import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.screens.torrentsearch.adapters.ActivityFragmentsAdapter
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentSearchFragment
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentTrackFragment
 
 
 class TorrentSearchListActivity : AppCompatActivity() {
@@ -26,7 +29,7 @@ class TorrentSearchListActivity : AppCompatActivity() {
     }
 
     private fun setupViewPager() {
-        val adapter = ActivityFragmentsAdapter(supportFragmentManager)
+        val adapter = ActivityFragmentsAdapter(supportFragmentManager, listOf<Fragment>(TorrentSearchFragment(), TorrentTrackFragment()), listOf<String>("Поиск", "Сохраненные поиски"))
         viewPager.adapter = adapter
         tabs.setupWithViewPager(viewPager)
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {

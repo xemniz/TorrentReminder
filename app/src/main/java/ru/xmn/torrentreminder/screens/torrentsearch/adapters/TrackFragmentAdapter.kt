@@ -1,6 +1,5 @@
 package ru.xmn.torrentreminder.screens.torrentsearch.adapters
 
-import org.jetbrains.anko.*
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
@@ -11,17 +10,23 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_torrent_search.view.*
+import org.jetbrains.anko.startActivity
+import ru.xmn.common.adapter.AutoUpdatableAdapter
 import ru.xmn.common.extensions.*
-import ru.xmn.common.ui.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 import ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity
 import kotlin.properties.Delegates
 
 
-class TrackFragmentAdapter(val torrentSearchStart: (String, String) -> Unit, val deleteItem: (String) -> Unit) : RecyclerView.Adapter<TrackFragmentAdapter.ViewHolder>(), AutoUpdatableAdapter {
+class TrackFragmentAdapter(
+        val torrentSearchStart: (String, String) -> Unit,
+        val deleteItem: (String) -> Unit,
+        onInsertedAction: (Int, Int) -> Unit)
+    : RecyclerView.Adapter<TrackFragmentAdapter.ViewHolder>(), AutoUpdatableAdapter {
+
     var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
-        autoNotify(oldValue, newValue) { a, b -> a.id == b.id }
+        autoNotify(oldValue, newValue, onInsertedAction) { a, b -> a.id == b.id }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart, deleteItem)
@@ -86,12 +91,9 @@ class TrackFragmentAdapter(val torrentSearchStart: (String, String) -> Unit, val
                     }
 
                 })
-                onFocusChangeListener = object : View.OnFocusChangeListener {
-                    override fun onFocusChange(p0: View?, p1: Boolean) {
-                        if (!p1)
-                            hideKeyboard()
-                    }
-
+                onFocusChangeListener = View.OnFocusChangeListener { p0, p1 ->
+                    if (!p1)
+                        hideKeyboard()
                 }
             }
 
@@ -105,7 +107,7 @@ class TrackFragmentAdapter(val torrentSearchStart: (String, String) -> Unit, val
         }
 
         private fun updateTorrentNameEditorButton() {
-            with(itemView){
+            with(itemView) {
                 if (torrentNameEditor.text.length > 2)
                     torrentNameEditorButton.visible() else torrentNameEditorButton.invisible()
             }
