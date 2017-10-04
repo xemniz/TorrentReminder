@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.fragments
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -16,11 +16,8 @@ import kotlinx.android.synthetic.main.fragment_torrent_track.*
 import kotlinx.android.synthetic.main.fragment_torrent_track.view.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentsearch.ToastMsg
-import ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchViewModel
-import ru.xmn.torrentreminder.screens.torrentsearch.adapters.TrackFragmentAdapter
 
-class TorrentTrackFragment : android.support.v4.app.Fragment() {
+class SavedSearchesFragment : android.support.v4.app.Fragment() {
 
     private lateinit var trackFragmentViewModel: TorrentSearchViewModel
 
@@ -60,7 +57,7 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
     }
 
     private fun showValue(items: List<TorrentSearch>) {
-        (torrentItemsList.adapter as TrackFragmentAdapter).items = items
+        (torrentItemsList.adapter as SavedSearchesAdapter).items = items
         updateScreen(items.any { it.searchQuery == "" })
     }
 
@@ -102,7 +99,7 @@ class TorrentTrackFragment : android.support.v4.app.Fragment() {
                     return focused
                 }
             }
-            adapter = TrackFragmentAdapter(
+            adapter = SavedSearchesAdapter(
                     torrentSearchStart = { id, query ->
                         trackFragmentViewModel.firstSearchOnItem(id, query)
                     },

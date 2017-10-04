@@ -8,7 +8,7 @@ import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearchRepository
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearcher
 import javax.inject.Inject
 
-class TorrentListUseCase
+class SavedSearchDetailsUseCase
 @Inject
 constructor(val torrentSearcher: TorrentSearcher, val torrentListRepository: TorrentSearchRepository) {
 

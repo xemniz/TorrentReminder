@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.fragments
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -19,9 +19,8 @@ import kotlinx.android.synthetic.main.fragment_torrent_search.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.common.extensions.visibleOnly
 import ru.xmn.torrentreminder.R
-import ru.xmn.torrentreminder.screens.torrentsearch.adapters.SearchFragmentAdapter
 
-class TorrentSearchFragment : android.support.v4.app.Fragment() {
+class SearchFragment : android.support.v4.app.Fragment() {
 
     lateinit var searchFragmentViewModel: SearchFragmentViewModel
 
@@ -41,11 +40,11 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
                 .of(this)
                 .get(SearchFragmentViewModel::class.java)
                 .apply {
-                    torrentListLiveData.observe(this@TorrentSearchFragment, Observer {
+                    torrentListLiveData.observe(this@SearchFragment, Observer {
                         showState(it!!)
                     })
                     torrent_search_view.setQuery(searchQueryLiveData.value, false)
-                    saveButtonShow.observe(this@TorrentSearchFragment, Observer {
+                    saveButtonShow.observe(this@SearchFragment, Observer {
                         updateScreen(it!!)
                     })
                 }
@@ -75,31 +74,31 @@ class TorrentSearchFragment : android.support.v4.app.Fragment() {
         when (state) {
             is SearchState.StartNewSearch -> {
                 layouts.visibleOnly(start_search_layout)
-                (torrent_searched_list.adapter as SearchFragmentAdapter).items = emptyList()
+                (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
             }
             is SearchState.Loading -> {
                 layouts.visibleOnly(progress)
-                (torrent_searched_list.adapter as SearchFragmentAdapter).items = emptyList()
+                (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
             }
             is SearchState.Empty -> {
                 layouts.visibleOnly(empty_search_layout)
-                (torrent_searched_list.adapter as SearchFragmentAdapter).items = emptyList()
+                (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
             }
             is SearchState.Success -> {
                 layouts.visibleOnly(torrent_searched_list)
-                (torrent_searched_list.adapter as SearchFragmentAdapter).items = state.list
+                (torrent_searched_list.adapter as TorrentDataAdapter).items = state.list
             }
             is SearchState.Error -> {
                 layouts.visibleOnly(error_layout)
                 error_button.setOnClickListener { searchFragmentViewModel.searchTorrents(torrent_search_view.query.toString()) }
-                (torrent_searched_list.adapter as SearchFragmentAdapter).items = emptyList()
+                (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
             }
         }
     }
 
     private fun setupRecyclerView() {
         torrent_searched_list.apply {
-            adapter = SearchFragmentAdapter { uri -> downloadTorrent(uri) }
+            adapter = TorrentDataAdapter { uri -> downloadTorrent(uri) }
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             setOnTouchListener { _, _ -> torrent_searched_list.hideKeyboard(); false }
             itemAnimator = FadeInUpAnimator()

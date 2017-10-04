@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.adapters
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches
 
 import android.os.Handler
 import android.support.v7.widget.RecyclerView
@@ -15,15 +15,15 @@ import ru.xmn.common.adapter.AutoUpdatableAdapter
 import ru.xmn.common.extensions.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity
+import ru.xmn.torrentreminder.screens.torrentlist.SavedSearchDetailsActivity
 import kotlin.properties.Delegates
 
 
-class TrackFragmentAdapter(
+class SavedSearchesAdapter(
         val torrentSearchStart: (String, String) -> Unit,
         val deleteItem: (String) -> Unit,
         onInsertedAction: (Int, Int) -> Unit)
-    : RecyclerView.Adapter<TrackFragmentAdapter.ViewHolder>(), AutoUpdatableAdapter {
+    : RecyclerView.Adapter<SavedSearchesAdapter.ViewHolder>(), AutoUpdatableAdapter {
 
     var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
         autoNotify(oldValue, newValue, onInsertedAction) { a, b -> a.id == b.id }
@@ -53,7 +53,7 @@ class TrackFragmentAdapter(
 
         private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch) {
             card_view.setOnClickListener {
-                context.startActivity<TorrentListActivity>(TorrentListActivity.ID to torrentSearch.id)
+                context.startActivity<SavedSearchDetailsActivity>(SavedSearchDetailsActivity.ID to torrentSearch.id)
             }
             views.visibleOnly(torrentName, torrentUpdatedInfo)
             torrentUpdatedInfo.text = context.getString(R.string.item_updated_info, torrentSearch.lastSearchedItems.size, torrentSearch.lastSearchedItems.filter { !it.isViewed }.size)

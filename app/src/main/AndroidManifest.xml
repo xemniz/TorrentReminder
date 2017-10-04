@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="ru.xmn.torrentreminder.screens.torrentsearch.TorrentSearchListActivity"
+            android:name="ru.xmn.torrentreminder.screens.torrentsearch.TorrentTabActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ru.xmn.torrentreminder.screens.torrentlist.TorrentListActivity"
+            android:name="ru.xmn.torrentreminder.screens.torrentlist.SavedSearchDetailsActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 

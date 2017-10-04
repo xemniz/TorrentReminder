@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.fragments
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
@@ -11,14 +11,14 @@ import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.di.TorrentModule
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
-import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchFragmentUseCase
+import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchUseCase
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class SearchFragmentViewModel : ViewModel() {
 
     @Inject
-    lateinit var searchFragmentUseCase: SearchFragmentUseCase
+    lateinit var searchUseCase: SearchUseCase
     val torrentListLiveData = MutableLiveData<SearchState>()
     val saveButtonShow = MutableLiveData<Boolean>()
     val searchQueryLiveData = MutableLiveData<String>()
@@ -38,7 +38,7 @@ class SearchFragmentViewModel : ViewModel() {
 
         Flowable.combineLatest<String, List<TorrentSearch>, Pair<String, List<TorrentSearch>>>(
                 searchQuerySubject,
-                searchFragmentUseCase.subscribeAllSearches(),
+                searchUseCase.subscribeAllSearches(),
                 BiFunction { query: String, searches: List<TorrentSearch> ->
                     Pair(query, searches)
                 })
@@ -54,7 +54,7 @@ class SearchFragmentViewModel : ViewModel() {
     }
 
     fun addNewItem(searchQuery: String) {
-        searchFragmentUseCase.addNewItem(searchQuery)
+        searchUseCase.addNewItem(searchQuery)
     }
 
     fun searchTorrents(query: String) {
@@ -62,7 +62,7 @@ class SearchFragmentViewModel : ViewModel() {
     }
 
     private fun searchFlowable(query: String) = when {
-        query.length > 2 -> searchFragmentUseCase.search(query)
+        query.length > 2 -> searchUseCase.search(query)
                 .map {
                     when {
                         it.isEmpty() -> SearchState.Empty

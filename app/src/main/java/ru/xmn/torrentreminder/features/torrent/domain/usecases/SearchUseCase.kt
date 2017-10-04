@@ -10,7 +10,7 @@ import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearchRepository
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearcher
 import javax.inject.Inject
 
-class SearchFragmentUseCase
+class SearchUseCase
 @Inject
 constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: TorrentSearchRepository) {
 

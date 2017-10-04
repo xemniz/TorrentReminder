@@ -6,14 +6,14 @@ import android.arch.lifecycle.ViewModelProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.di.TorrentModule
-import ru.xmn.torrentreminder.features.torrent.domain.usecases.TorrentListUseCase
+import ru.xmn.torrentreminder.features.torrent.domain.usecases.SavedSearchDetailsUseCase
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 import javax.inject.Inject
 
-class TorrentListViewModule(val id: String) : ViewModel() {
+class SavedSearchDetailsViewModule(val id: String) : ViewModel() {
 
     @Inject
-    lateinit var torrentListUseCase: TorrentListUseCase
+    lateinit var savedSearchDetailsUseCase: SavedSearchDetailsUseCase
     val torrentListLiveData = MutableLiveData<TorrentSearch>()
     val errorToastLiveData = MutableLiveData<Boolean>()
     val showSwipeRefresh = MutableLiveData<Boolean>()
@@ -28,11 +28,11 @@ class TorrentListViewModule(val id: String) : ViewModel() {
 
 
     fun subscribeTorrentList(id: String) {
-        torrentListUseCase.getTorrentList(id).subscribe { torrentListLiveData.value = it }
+        savedSearchDetailsUseCase.getTorrentList(id).subscribe { torrentListLiveData.value = it }
     }
 
     fun updateSearch(id: String) {
-        torrentListUseCase.updateSearch(id)
+        savedSearchDetailsUseCase.updateSearch(id)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { showSwipeRefresh.value = true }
                 .onErrorComplete { errorToastLiveData.value = true; true }
@@ -45,7 +45,7 @@ class TorrentListViewModule(val id: String) : ViewModel() {
 
     class TorrentListViewModelFactory(val id: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return TorrentListViewModule(id) as T
+            return SavedSearchDetailsViewModule(id) as T
         }
     }
 

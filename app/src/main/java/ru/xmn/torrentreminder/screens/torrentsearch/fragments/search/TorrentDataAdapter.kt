@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch.adapters
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -10,7 +10,8 @@ import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
 import kotlin.properties.Delegates
 
-class SearchFragmentAdapter(val torrentDownload: (String) -> Unit) : RecyclerView.Adapter<SearchFragmentAdapter.ViewHolder>(), AutoUpdatableAdapter {
+class TorrentDataAdapter(val torrentDownload: (String) -> Unit) : RecyclerView.Adapter<TorrentDataAdapter.ViewHolder>(), AutoUpdatableAdapter {
+
     var items by Delegates.observable(emptyList<TorrentData>()) { _, old, new ->
         autoNotify(old, new) { a, b -> a.name == b.name }
     }

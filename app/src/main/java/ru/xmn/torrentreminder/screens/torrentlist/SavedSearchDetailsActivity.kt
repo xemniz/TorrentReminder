@@ -13,13 +13,13 @@ import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
 
-class TorrentListActivity : AppCompatActivity() {
+class SavedSearchDetailsActivity : AppCompatActivity() {
 
     companion object {
         const val ID = "id"
     }
 
-    lateinit var torrentListViewModel: TorrentListViewModule
+    lateinit var savedSearchDetailsViewModel: SavedSearchDetailsViewModule
     lateinit var id: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,9 +49,9 @@ class TorrentListActivity : AppCompatActivity() {
 
     private fun setupViewModel() {
         val torrentListActivity = this
-        torrentListViewModel = ViewModelProviders
-                .of(this, TorrentListViewModule.TorrentListViewModelFactory(id))
-                .get(TorrentListViewModule::class.java)
+        savedSearchDetailsViewModel = ViewModelProviders
+                .of(this, SavedSearchDetailsViewModule.TorrentListViewModelFactory(id))
+                .get(SavedSearchDetailsViewModule::class.java)
                 .apply {
                     torrentListLiveData.observe(torrentListActivity, Observer {
                         toolbarTitle.text = it!!.searchQuery
@@ -60,7 +60,7 @@ class TorrentListActivity : AppCompatActivity() {
                     errorToastLiveData.observe(torrentListActivity, Observer {
                         if (it!!) {
                             showErrorMessage()
-                            torrentListViewModel.toastIsViewed()
+                            savedSearchDetailsViewModel.toastIsViewed()
                         }
                     })
                     showSwipeRefresh.observe(torrentListActivity, Observer {
@@ -70,7 +70,7 @@ class TorrentListActivity : AppCompatActivity() {
     }
 
     private fun showList(list: List<TorrentItem>) {
-        (torrentItemList.adapter as TorrentListAdapter).items = list
+        (torrentItemList.adapter as TorrentItemsAdapter).items = list
     }
 
     private fun showErrorMessage() {
@@ -78,12 +78,12 @@ class TorrentListActivity : AppCompatActivity() {
     }
 
     private fun setupClickListener() {
-        swipe_container_list.setOnRefreshListener { torrentListViewModel.updateSearch(id) }
+        swipe_container_list.setOnRefreshListener { savedSearchDetailsViewModel.updateSearch(id) }
     }
 
     private fun setupRecyclerView() {
         torrentItemList.apply {
-            adapter = TorrentListAdapter { uri -> downloadTorrent(uri) }
+            adapter = TorrentItemsAdapter { uri -> downloadTorrent(uri) }
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
     }

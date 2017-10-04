@@ -3,19 +3,17 @@ package ru.xmn.torrentreminder.screens.torrentsearch
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_torrent_search_list.*
 import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.torrentreminder.R
-import ru.xmn.torrentreminder.screens.torrentsearch.adapters.ActivityFragmentsAdapter
-import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentSearchFragment
-import ru.xmn.torrentreminder.screens.torrentsearch.fragments.TorrentTrackFragment
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.search.SearchFragment
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches.SavedSearchesFragment
 
 
-class TorrentSearchListActivity : AppCompatActivity() {
+class TorrentTabActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +28,8 @@ class TorrentSearchListActivity : AppCompatActivity() {
     }
 
     private fun setupViewPager() {
-        val fragmentList = listOf<Fragment>(TorrentSearchFragment(), TorrentTrackFragment())
-        val adapter = ActivityFragmentsAdapter(supportFragmentManager, fragmentList, listOf<String>("Поиск", "Сохраненные поиски"))
+        val fragmentList = listOf<Fragment>(SearchFragment(), SavedSearchesFragment())
+        val adapter = TabAdapter(supportFragmentManager, fragmentList, listOf<String>("Поиск", "Сохраненные поиски"))
         viewPager.adapter = adapter
         tabs.setupWithViewPager(viewPager)
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -45,8 +43,8 @@ class TorrentSearchListActivity : AppCompatActivity() {
             override fun onPageSelected(position: Int) {
                 viewPager.hideKeyboard()
                 val currentFragment = fragmentList[position]
-                if (currentFragment !is TorrentTrackFragment)
-                    Handler().postDelayed({fragmentList.filterIsInstance(TorrentTrackFragment::class.java).first().deleteNewSearch()}, 300)
+                if (currentFragment !is SavedSearchesFragment)
+                    Handler().postDelayed({fragmentList.filterIsInstance(SavedSearchesFragment::class.java).first().deleteNewSearch()}, 300)
             }
 
         })

@@ -1,4 +1,4 @@
-package ru.xmn.torrentreminder.screens.torrentsearch
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
