@@ -21,6 +21,7 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                             .flatMapCompletable { Completable.fromAction { torrentSearchRepository.update(id, searchQuery, it) } }
                 }
                 .subscribeOn(Schedulers.io())
+                .onErrorComplete()
                 .subscribe()
     }
 

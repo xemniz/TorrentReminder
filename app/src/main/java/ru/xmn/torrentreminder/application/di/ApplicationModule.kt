@@ -10,7 +10,7 @@ import ru.xmn.torrentreminder.features.torrent.di.TorrentComponent
 import javax.inject.Singleton
 
 @Module(subcomponents = arrayOf(TorrentComponent::class))
-class ApplicationModule(private val app: App) {
+class ApplicationModule(private val app: Context) {
     @Provides
     @Singleton
     fun provideApplicationContext(): Context = app

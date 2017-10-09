@@ -24,7 +24,7 @@ class TorrentSearchViewModel : ViewModel() {
         torrentSearchUseCase.subscribeAllSearches()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { torrentItemsLiveData.value = it }
-        updateAllItems()
+//        updateAllItems()
         torrentSearchUseCase.deleteNewSearch()
     }
 

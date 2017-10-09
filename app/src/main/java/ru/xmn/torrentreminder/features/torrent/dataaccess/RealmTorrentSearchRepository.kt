@@ -37,11 +37,11 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
 
             if (realmTorrentSearch != null) realmTorrentSearch.let { search ->
                 val newItems = dataList.map { TorrentItem(it, false) }
-                        .map { it.toRealm() }
-                        .filter { newItem -> search.torrentItems.firstOrNull { oldItem -> oldItem.name == newItem.name } == null }
+                        .filter { newItem -> !search.torrentItems.any { oldItem -> oldItem.name == newItem.name } }
                 realm.executeTransaction {
                     search.searchQuery = searchQuery
-                    search.torrentItems.addAll(newItems)
+                    search.torrentItems.addAll(newItems.map { it.toRealm() }
+                    )
                 }
             } else {
                 Log.d("RealmSearchRepository", "вызван метод update(), Итем не найден")
