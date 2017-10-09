@@ -14,7 +14,7 @@ class TorrentModule {
     @Provides
     fun provideDocumentProvider(): DocumentProvider = object : DocumentProvider {
         override fun provide(q: String): Document {
-            return Jsoup.connect("http://live-rutor.org/search/$q/").get()
+            return Jsoup.connect("http://nnm-club.name/forum/tracker.php?nm=$q").get()
         }
     }
 

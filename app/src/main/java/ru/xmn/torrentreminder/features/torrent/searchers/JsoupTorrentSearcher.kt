@@ -7,14 +7,13 @@ import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearcher
 class JsoupTorrentSearcher(val documentProvider: DocumentProvider) : TorrentSearcher {
     override fun searchTorrents(query: String): List<TorrentData> {
         val doc = documentProvider.provide(query)
-        val newsHeadlines = doc.select("div#index")
-                .select("table")
+        val newsHeadlines = doc.select("div.wrap")
+                .select("table.forumline.tablesorter")
                 .select("tbody")
                 .select("tr")
-                .select("td")
 
-        val names = newsHeadlines.select("a[href*=/torrent/]")
-        val torrentUrls = newsHeadlines.select("a.downgif")
+        val names = newsHeadlines.select("td.genmed").select("a").select("b")
+        val torrentUrls = newsHeadlines.select("td").select("a.genmed").select("a[href*=download]")
 
         if (!newsHeadlines.isEmpty()) {
             return names.zip(torrentUrls){name, url -> TorrentData(name.html(), url.attr("href")) }
