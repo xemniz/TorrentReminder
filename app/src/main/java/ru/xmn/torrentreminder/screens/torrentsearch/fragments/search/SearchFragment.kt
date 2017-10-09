@@ -106,7 +106,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
     }
 
     private fun downloadTorrent(torrentUri: String) {
-        val uri = Uri.parse("http://live-rutor.org" + torrentUri)
+        val uri = Uri.parse("http://nnm-club.name/forum/" + torrentUri)
         val intent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(intent)
     }
