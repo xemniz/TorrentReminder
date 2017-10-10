@@ -19,7 +19,9 @@ class ScheduledJobService : JobService() {
     }
 
     override fun onStartJob(job: JobParameters?): Boolean {
-        savedSearchServiceUseCase.updateAllItems().subscribe(Consumer { println(it) })
+        savedSearchServiceUseCase.updateAllItems().subscribe(Consumer {
+            if (it.isNotEmpty()) savedSearchServiceUseCase.notification(applicationContext, it)
+        })
         return true
     }
 
