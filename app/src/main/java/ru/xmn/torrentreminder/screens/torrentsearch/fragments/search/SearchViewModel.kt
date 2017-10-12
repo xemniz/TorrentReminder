@@ -47,6 +47,9 @@ class SearchFragmentViewModel : ViewModel() {
                 .subscribe {
                     saveButtonShow.value = it
                 }
+
+        //для отрисовки начального стейта
+        searchQuerySubject.onNext("")
     }
 
     fun addNewItem(searchQuery: String) {
