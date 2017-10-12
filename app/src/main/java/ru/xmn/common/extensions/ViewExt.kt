@@ -3,6 +3,8 @@ package ru.xmn.common.extensions
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.TransitionDrawable
 import android.support.v4.view.ViewCompat
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -61,4 +63,11 @@ fun View.hideKeyboard() {
 fun View.showKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.showSoftInput(this, 0)
+}
+
+fun View.animateBackground(startColor: Int, endColor: Int, duration: Int = 300) {
+    val color = arrayOf(ColorDrawable(startColor), ColorDrawable(endColor))
+    val trans = TransitionDrawable(color)
+    this.background = trans
+    trans.startTransition(duration)
 }

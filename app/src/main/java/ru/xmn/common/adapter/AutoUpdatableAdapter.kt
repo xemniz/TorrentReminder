@@ -10,6 +10,7 @@ interface AutoUpdatableAdapter {
             old: List<T>,
             new: List<T>,
             onInsertedAction: (Int, Int) -> Unit = { _, _ -> },
+            changePayload: (Int, Int) -> Any? = { _, _ -> null},
             compare: (T, T) -> Boolean
     ) {
         val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -25,6 +26,10 @@ interface AutoUpdatableAdapter {
             override fun getOldListSize() = old.size
 
             override fun getNewListSize() = new.size
+
+            override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+                return changePayload(oldItemPosition, newItemPosition)
+            }
         })
 
         diff.dispatchUpdatesTo(object : ListUpdateCallback {

@@ -3,6 +3,7 @@ package ru.xmn.torrentreminder.screens.torrentlist
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
+import android.os.Handler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.di.TorrentModule
@@ -24,6 +25,8 @@ class SavedSearchDetailsViewModule(val id: String) : ViewModel() {
                 .build().inject(this)
 
         subscribeTorrentList(id)
+
+        Handler().postDelayed({savedSearchDetailsUseCase.checkAllAsViewed(id)}, 2000)
     }
 
 

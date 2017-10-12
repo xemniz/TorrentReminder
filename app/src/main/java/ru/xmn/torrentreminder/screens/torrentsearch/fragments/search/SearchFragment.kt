@@ -112,19 +112,17 @@ class SearchFragment : android.support.v4.app.Fragment() {
     }
 
 
-    private fun updateScreen(showButtonSave: Boolean) {
-        val hided = fab.translationX > 0f
-
-        val needToHide = !showButtonSave && !hided
-        val needToShow = showButtonSave && hided
+    private fun updateScreen(showButtonSave: Pair<Boolean, Boolean>) {
+        val (previous, show) = showButtonSave
+        if (previous == show) return
 
         when {
-            needToHide ->
+            !show ->
                 fab.animate().translationX(300f)
                         .apply { interpolator = AccelerateInterpolator() }
                         .start()
 
-            needToShow ->
+            show ->
                 fab.animate().translationX(0f)
                         .apply { interpolator = DecelerateInterpolator() }
                         .start()

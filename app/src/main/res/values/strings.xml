@@ -2,7 +2,7 @@
     <string name="app_name">Torrent reminder</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="torrent_search_hint">Поиск торрента</string>
-    <string name="item_updated_info">Найдено: %1$d, новых: %2$d</string>
+    <string name="item_updated_info">Найдено: %1$d, непросмотренных: %2$d</string>
     <string name="common_min_three_search_text">Введите как минимум три символа для начала поиска</string>
     <string name="common_nothing_found_search_text">По данному запросу ничего не найдено</string>
     <string name="common_error_text">Произошла ошибка.</string>

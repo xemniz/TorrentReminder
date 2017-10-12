@@ -29,4 +29,8 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentListRepository: Tor
                 }
                 .flatMapCompletable { Completable.fromCallable { torrentListRepository.update(it.first.id, it.first.searchQuery, it.second) } }
     }
+
+    fun checkAllAsViewed(id: String) {
+        torrentListRepository.checkAllItemsInSearchAsViewed(id)
+    }
 }

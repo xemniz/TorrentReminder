@@ -5,4 +5,5 @@
     <color name="colorAccent">#dd0e51</color>
     <color name="approveGreen">#81c784</color>
     <color name="closeRed">#e57373</color>
+    <color name="not_viewed_item_color">#ebf9ff</color>
 </resources>
