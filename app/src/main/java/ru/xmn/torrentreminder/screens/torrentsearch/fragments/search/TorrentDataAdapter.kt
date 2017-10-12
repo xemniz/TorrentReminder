@@ -8,11 +8,12 @@ import ru.xmn.common.extensions.inflate
 import ru.xmn.common.adapter.AutoUpdatableAdapter
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
 import kotlin.properties.Delegates
 
 class TorrentDataAdapter(val torrentDownload: (String) -> Unit) : RecyclerView.Adapter<TorrentDataAdapter.ViewHolder>(), AutoUpdatableAdapter {
 
-    var items by Delegates.observable(emptyList<TorrentData>()) { _, old, new ->
+    var items by Delegates.observable(emptyList<TorrentItem>()) { _, old, new ->
         autoNotify(old, new) { a, b -> a.name == b.name }
     }
 
@@ -23,7 +24,7 @@ class TorrentDataAdapter(val torrentDownload: (String) -> Unit) : RecyclerView.A
     override fun getItemCount() = items.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(torrentData: TorrentData, torrentDownload: (String) -> Unit) {
+        fun bind(torrentData: TorrentItem, torrentDownload: (String) -> Unit) {
             with(itemView) {
                 name.text = torrentData.name
                 download.setOnClickListener { torrentDownload(torrentData.torrentUrl) }

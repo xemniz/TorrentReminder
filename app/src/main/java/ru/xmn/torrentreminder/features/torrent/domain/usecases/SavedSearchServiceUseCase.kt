@@ -51,7 +51,7 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                 .cache()
     }
 
-    fun notification(context: Context, it: ArrayList<TorrentSearch>){
+    fun notification(context: Context, it: ArrayList<TorrentSearch>) {
 
         val intent = Intent(context, SavedSearchesFragment::class.java)
         val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -71,7 +71,7 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
     }
 
     private fun updatedItems(list: ArrayList<TorrentSearch>): String {
-        var s =""
+        var s = ""
         list.forEach { s += it.searchQuery + " +" + it.lastSearchedItems.size + "\n" }
         return s
     }

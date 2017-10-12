@@ -80,13 +80,15 @@ class SearchFragment : android.support.v4.app.Fragment() {
                 layouts.visibleOnly(progress)
                 (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
             }
-            is SearchState.Empty -> {
-                layouts.visibleOnly(empty_search_layout)
-                (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
-            }
             is SearchState.Success -> {
-                layouts.visibleOnly(torrent_searched_list)
-                (torrent_searched_list.adapter as TorrentDataAdapter).items = state.list
+                if (state.list.isNotEmpty()) {
+                    layouts.visibleOnly(torrent_searched_list)
+                    (torrent_searched_list.adapter as TorrentDataAdapter).items = state.list
+                } else {
+                    layouts.visibleOnly(empty_search_layout)
+                    (torrent_searched_list.adapter as TorrentDataAdapter).items = emptyList()
+                    empty_search_layout.text = if (state.newSearch) resources.getString(R.string.common_nothing_found_search_text) else resources.getString(R.string.nothing_found_saved_search_text)
+                }
             }
             is SearchState.Error -> {
                 layouts.visibleOnly(error_layout)
@@ -112,10 +114,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
     }
 
 
-    private fun updateScreen(showButtonSave: Pair<Boolean, Boolean>) {
-        val (previous, show) = showButtonSave
-        if (previous == show) return
-
+    private fun updateScreen(show: Boolean) {
         when {
             !show ->
                 fab.animate().translationX(300f)

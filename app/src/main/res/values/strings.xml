@@ -7,4 +7,5 @@
     <string name="common_nothing_found_search_text">По данному запросу ничего не найдено</string>
     <string name="common_error_text">Произошла ошибка.</string>
     <string name="common_retry_text">повторить</string>
+    <string name="nothing_found_saved_search_text">На данный момент по этому сохраненному поиску ничего не найдено. Мы пришлем Вам оповещение, как только будут обновления.</string>
 </resources>

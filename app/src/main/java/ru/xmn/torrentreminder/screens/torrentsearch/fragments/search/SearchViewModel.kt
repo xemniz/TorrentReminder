@@ -12,6 +12,8 @@ import org.reactivestreams.Subscription
 import ru.xmn.common.rx.CachePrevious
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
+import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchResult
 import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchUseCase
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -21,7 +23,7 @@ class SearchFragmentViewModel : ViewModel() {
     @Inject
     lateinit var searchUseCase: SearchUseCase
     val torrentListLiveData = MutableLiveData<SearchState>()
-    val saveButtonShow = MutableLiveData<Pair<Boolean, Boolean>>()
+    val saveButtonShow = MutableLiveData<Boolean>()
     val searchQueryLiveData = MutableLiveData<String>()
     private val searchQuerySubject: BehaviorProcessor<String> = BehaviorProcessor.createDefault("")
 
@@ -43,13 +45,7 @@ class SearchFragmentViewModel : ViewModel() {
                 BiFunction { queryIsNotTooSmall: Boolean, searchIsSaved: Boolean ->
                     queryIsNotTooSmall && !searchIsSaved
                 })
-                .lift<Pair<Boolean, Boolean>>(CachePrevious(false))
-                .subscribe {
-                    saveButtonShow.value = it
-                }
-
-        //для отрисовки начального стейта
-        searchQuerySubject.onNext("")
+                .subscribe { saveButtonShow.value = it }
     }
 
     fun addNewItem(searchQuery: String) {
@@ -62,12 +58,12 @@ class SearchFragmentViewModel : ViewModel() {
 
     private fun searchFlowable(query: String) = when {
         queryIsNotTooSmall(query) ->
-            searchUseCase.search(query)
+            searchUseCase.searchResult
                     .map {
-                        when {
-                            it.isEmpty() -> SearchState.Empty
-                            else -> SearchState.Success(it)
-                        }
+                        when (it) {
+                            is SearchResult.NewSearch -> SearchState.Success(it.list, true)
+                            is SearchResult.SavedSearch -> SearchState.Success(it.search.lastSearchedItems, false)
+                        } as SearchState
                     }
                     .onErrorReturn { SearchState.Error(it) }
                     .startWith(SearchState.Loading)
@@ -80,9 +76,10 @@ class SearchFragmentViewModel : ViewModel() {
 
 
 sealed class SearchState {
-    class Success(val list: List<TorrentData>) : SearchState()
-    class Error(val error: Throwable) : SearchState()
+    class Success(val list: List<TorrentItem>, val newSearch: Boolean) : SearchState()
+    class Error(val error: Throwable) : SearchState(){init {
+        error.printStackTrace()
+    }}
     object Loading : SearchState()
     object StartNewSearch : SearchState()
-    object Empty : SearchState()
 }
