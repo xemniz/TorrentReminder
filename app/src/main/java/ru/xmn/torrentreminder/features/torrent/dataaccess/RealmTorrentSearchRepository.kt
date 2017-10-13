@@ -82,7 +82,12 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                     .equalTo(RealmTorrentSearch.ID, id)
                     .findFirst()
 
-            it.executeTransaction { realmTorrentSearch?.torrentItems?.forEach { it.isViewed = true } }
+            it.executeTransaction {
+                realmTorrentSearch?.torrentItems?.forEach {
+                    if (it.isViewed == false)
+                        it.isViewed = true
+                }
+            }
         }
     }
 

@@ -114,7 +114,10 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
     }
 
     fun deleteNewSearch() {
-        trackFragmentViewModel.deleteNewSearch()
+        try {
+            trackFragmentViewModel.deleteNewSearch()
+        } catch (e: Throwable) {
+        }
     }
 
 }

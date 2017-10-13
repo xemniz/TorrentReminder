@@ -2,10 +2,7 @@ package ru.xmn.torrentreminder.features.torrent.domain.usecases
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Single
 import io.reactivex.functions.BiFunction
-import io.reactivex.processors.BehaviorProcessor
-import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import ru.xmn.torrentreminder.features.torrent.domain.*
 import javax.inject.Inject
@@ -13,25 +10,21 @@ import javax.inject.Inject
 class SearchUseCase
 @Inject
 constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: TorrentSearchRepository) {
-    val searchResult: PublishProcessor<SearchResult> = PublishProcessor.create()
-    val searchIsSaved: PublishProcessor<Boolean> = PublishProcessor.create()
 
-    fun addNewItem(searchQuery: String) {
-        Single.fromCallable { torrentSearchRepository.insert(searchQuery, emptyList()) }
-                .flatMapCompletable { id ->
-                    Single.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
-                            .flatMapCompletable {
-                                Completable.fromAction {
-                                    torrentSearchRepository.update(id, searchQuery, it)
-                                }
-                            }
+    fun addNewItem(searchQuery: String): Flowable<Unit> {
+        return Flowable.fromCallable { torrentSearchRepository.insert(searchQuery, emptyList()) }
+                .flatMap { id ->
+                    Flowable.fromCallable { Pair(id, torrentSearcher.searchTorrents(searchQuery)) }
                 }
-                .onErrorComplete()
-                .subscribe()
+                .flatMap {
+                    Flowable.fromCallable {
+                        torrentSearchRepository.update(it.first, searchQuery, it.second)
+                    }
+                }
     }
 
-    fun bindQueryFlowable(searchQueryFlowable: Flowable<String>) {
-        Flowable.combineLatest<String, List<TorrentSearch>, Pair<String, List<TorrentSearch>>>(
+    fun isSearchSaved(searchQueryFlowable: Flowable<String>): Flowable<Boolean> {
+        return Flowable.combineLatest<String, List<TorrentSearch>, Pair<String, List<TorrentSearch>>>(
                 searchQueryFlowable,
                 torrentSearchRepository.subscribeAllSearches(),
                 BiFunction { query: String, searches: List<TorrentSearch> ->
@@ -41,25 +34,26 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                     val (query, searches) = it
                     searches.any { it.searchQuery == query }
                 }
-                .subscribe(searchIsSaved)
 
+    }
 
-        searchQueryFlowable
-                .flatMap { query: String ->
-                    torrentSearchRepository.subscribeAllSearches().take(1).map { Pair(query, it) }
-                }
+    fun foundedOrSavedItems(searchQuery: String): Flowable<SearchResult> {
+        return torrentSearchRepository.subscribeAllSearches()
+                .take(1)
+                .map { Pair(searchQuery, it) }
                 .flatMap {
                     val (query, searches) = it
                     val search = searches.firstOrNull { it.searchQuery == query }
                     if (search == null)
                         return@flatMap search(query)
-                                .map { it.map { TorrentItem(it, false) } }
-                                .map { SearchResult.NewSearch(it) }
+                                .map { it.map { TorrentItem(it, true) } }
+                                .map { SearchResult.NewSearch(it) as SearchResult }
+                                .onErrorReturn { SearchResult.Error(it) }
                     else
                         return@flatMap subscribeSearchAndUpdate(search)
-                                .map { SearchResult.SavedSearch(it) }
+                                .map { SearchResult.SavedSearch(it) as SearchResult }
+                                .onErrorReturn { SearchResult.Error(it) }
                 }
-                .subscribe(searchResult)
     }
 
     private fun search(searchQuery: String): Flowable<List<TorrentData>> {
@@ -81,9 +75,14 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                             }
                 }
     }
+
+    fun markAsViewed(id: String) {
+        torrentSearchRepository.checkAllItemsInSearchAsViewed(id)
+    }
 }
 
 sealed class SearchResult {
     class NewSearch(val list: List<TorrentItem>) : SearchResult()
     class SavedSearch(val search: TorrentSearch) : SearchResult()
+    class Error(val error: Throwable) : SearchResult()
 }

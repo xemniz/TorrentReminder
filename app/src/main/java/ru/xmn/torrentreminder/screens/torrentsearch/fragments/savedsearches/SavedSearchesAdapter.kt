@@ -15,7 +15,6 @@ import ru.xmn.common.adapter.AutoUpdatableAdapter
 import ru.xmn.common.extensions.*
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
-import ru.xmn.torrentreminder.screens.torrentlist.SavedSearchDetailsActivity
 import kotlin.properties.Delegates
 
 
@@ -25,7 +24,7 @@ class SavedSearchesAdapter(
         onInsertedAction: (Int, Int) -> Unit)
     : RecyclerView.Adapter<SavedSearchesAdapter.ViewHolder>(), AutoUpdatableAdapter {
 
-    var items by Delegates.observable(emptyList<TorrentSearch>()) { property, oldValue, newValue ->
+    var items by Delegates.observable(emptyList<TorrentSearch>()) { _, oldValue, newValue ->
         autoNotify(oldValue, newValue, onInsertedAction) { a, b -> a.id == b.id }
     }
 
@@ -53,7 +52,6 @@ class SavedSearchesAdapter(
 
         private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch) {
             card_view.setOnClickListener {
-                context.startActivity<SavedSearchDetailsActivity>(SavedSearchDetailsActivity.ID to torrentSearch.id)
             }
             views.visibleOnly(torrentName, torrentUpdatedInfo)
             torrentUpdatedInfo.text = context.getString(R.string.item_updated_info, torrentSearch.lastSearchedItems.size, torrentSearch.lastSearchedItems.filter { !it.isViewed }.size)
@@ -91,7 +89,7 @@ class SavedSearchesAdapter(
                     }
 
                 })
-                onFocusChangeListener = View.OnFocusChangeListener { p0, p1 ->
+                onFocusChangeListener = View.OnFocusChangeListener { _, p1 ->
                     if (!p1)
                         hideKeyboard()
                 }

@@ -2,21 +2,22 @@ package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.FlowableOperator
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.processors.BehaviorProcessor
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
-import ru.xmn.common.rx.CachePrevious
+import io.reactivex.schedulers.Schedulers
 import ru.xmn.torrentreminder.application.App
-import ru.xmn.torrentreminder.features.torrent.domain.TorrentData
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentItem
+import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchResult
 import ru.xmn.torrentreminder.features.torrent.domain.usecases.SearchUseCase
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
 
 class SearchFragmentViewModel : ViewModel() {
 
@@ -26,49 +27,72 @@ class SearchFragmentViewModel : ViewModel() {
     val saveButtonShow = MutableLiveData<Boolean>()
     val searchQueryLiveData = MutableLiveData<String>()
     private val searchQuerySubject: BehaviorProcessor<String> = BehaviorProcessor.createDefault("")
+    private var subscription: Disposable? = null
 
     init {
         App.component.torrentItemsComponent().build().inject(this)
 
+        torrentListLiveData.value = SearchState.StartNewSearch
+
         searchQuerySubject
                 .debounce(300, TimeUnit.MILLISECONDS)
-                .switchMap { searchFlowable(it) }
                 .observeOn(AndroidSchedulers.mainThread())
-                .startWith(SearchState.StartNewSearch)
-                .subscribe { torrentListLiveData.value = it }
-
-        searchUseCase.bindQueryFlowable(searchQuerySubject)
+                .subscribe { searchFlowable(it) }
 
         Flowable.combineLatest<Boolean, Boolean, Boolean>(
                 searchQuerySubject.map { queryIsNotTooSmall(it) },
-                searchUseCase.searchIsSaved,
+                searchUseCase.isSearchSaved(searchQuerySubject),
                 BiFunction { queryIsNotTooSmall: Boolean, searchIsSaved: Boolean ->
                     queryIsNotTooSmall && !searchIsSaved
                 })
+                .distinctUntilChanged()
                 .subscribe { saveButtonShow.value = it }
     }
 
     fun addNewItem(searchQuery: String) {
         searchUseCase.addNewItem(searchQuery)
+                .flatMap { searchQuerySubject }
+                .filter { it == searchQuery }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ searchFlowable(it) }, { it.printStackTrace() })
+    }
+
+    fun markAsViewed(id: String) {
+        Observable.just(true).delay(1000, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .flatMapCompletable { Completable.fromCallable { searchUseCase.markAsViewed(id) } }
+                .subscribe()
     }
 
     fun searchTorrents(query: String) {
         searchQuerySubject.onNext(query)
     }
 
-    private fun searchFlowable(query: String) = when {
-        queryIsNotTooSmall(query) ->
-            searchUseCase.searchResult
-                    .map {
-                        when (it) {
-                            is SearchResult.NewSearch -> SearchState.Success(it.list, true)
-                            is SearchResult.SavedSearch -> SearchState.Success(it.search.lastSearchedItems, false)
-                        } as SearchState
-                    }
-                    .onErrorReturn { SearchState.Error(it) }
-                    .startWith(SearchState.Loading)
-        else ->
-            Flowable.just(SearchState.StartNewSearch)
+    private fun searchFlowable(query: String) {
+        subscription?.apply {
+            if (!subscription!!.isDisposed)
+                subscription!!.dispose()
+        }
+
+        subscription = when {
+            queryIsNotTooSmall(query) ->
+                searchUseCase.foundedOrSavedItems(query)
+                        .map {
+                            when (it) {
+                                is SearchResult.NewSearch -> SearchState.SuccessNewSearch(it.list)
+                                is SearchResult.SavedSearch -> SearchState.SuccessSavedSearch(it.search)
+                                is SearchResult.Error -> SearchState.Error(it.error)
+                            }
+                        }
+                        .onErrorReturn { SearchState.Error(it) }
+                        .startWith(SearchState.Loading)
+            else ->
+                Flowable.just(SearchState.StartNewSearch)
+        }
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { torrentListLiveData.value = it }
     }
 
     private fun queryIsNotTooSmall(query: String) = query.length > 2
@@ -76,10 +100,13 @@ class SearchFragmentViewModel : ViewModel() {
 
 
 sealed class SearchState {
-    class Success(val list: List<TorrentItem>, val newSearch: Boolean) : SearchState()
-    class Error(val error: Throwable) : SearchState(){init {
+    class SuccessNewSearch(val list: List<TorrentItem>) : SearchState()
+    class SuccessSavedSearch(val search: TorrentSearch) : SearchState()
+    class Error(val error: Throwable) : SearchState() {init {
         error.printStackTrace()
-    }}
+    }
+    }
+
     object Loading : SearchState()
     object StartNewSearch : SearchState()
 }

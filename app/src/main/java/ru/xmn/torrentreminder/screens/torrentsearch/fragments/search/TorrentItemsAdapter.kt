@@ -1,5 +1,6 @@
-package ru.xmn.torrentreminder.screens.torrentlist
+package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -48,8 +49,8 @@ class TorrentItemsAdapter(val torrentDownload: (String) -> Unit) : RecyclerView.
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val viewedColor = itemView.context.resources.getColor(android.R.color.white)
-        private val notViewedColor = itemView.context.resources.getColor(R.color.not_viewed_item_color)
+        private val viewedColor = ContextCompat.getColor(itemView.context, android.R.color.white)
+        private val notViewedColor = ContextCompat.getColor(itemView.context, R.color.not_viewed_item_color)
 
         fun renderChanges(payload: TorrentItemChangePayload) {
             with(itemView) {
