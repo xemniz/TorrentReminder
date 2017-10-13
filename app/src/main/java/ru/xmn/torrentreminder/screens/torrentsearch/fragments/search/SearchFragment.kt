@@ -137,7 +137,6 @@ class SearchFragment : android.support.v4.app.Fragment() {
             addTarget(error_layout)
             addTarget(empty_search_layout)
             addTarget(start_search_layout)
-            addTarget(progress)
         }
 
         val elementsTransitionFade = Fade().apply {
