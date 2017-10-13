@@ -21,14 +21,15 @@ import kotlin.properties.Delegates
 class SavedSearchesAdapter(
         val torrentSearchStart: (String, String) -> Unit,
         val deleteItem: (String) -> Unit,
-        onInsertedAction: (Int, Int) -> Unit)
+        onInsertedAction: (Int, Int) -> Unit,
+        val clickSavedSearch: (String) -> Unit)
     : RecyclerView.Adapter<SavedSearchesAdapter.ViewHolder>(), AutoUpdatableAdapter {
 
     var items by Delegates.observable(emptyList<TorrentSearch>()) { _, oldValue, newValue ->
         autoNotify(oldValue, newValue, onInsertedAction) { a, b -> a.id == b.id }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart, deleteItem)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], torrentSearchStart, deleteItem, clickSavedSearch)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(parent.inflate(R.layout.item_torrent_search))
 
@@ -37,7 +38,7 @@ class SavedSearchesAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         lateinit var views: List<View>
 
-        fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit) {
+        fun bind(torrentSearch: TorrentSearch, torrentSearchStart: (String, String) -> Unit, deleteItem: (String) -> Unit, clickSavedSearch: (String) -> Unit) {
             with(itemView) {
                 views = listOf(torrentNameEditor, torrentNameEditorButton, torrentName, torrentUpdatedInfo)
                 torrentDeleteItem.setOnClickListener {
@@ -45,13 +46,14 @@ class SavedSearchesAdapter(
                 }
                 when {
                     torrentSearch.searchQuery == "" -> bindAsNewSearch(torrentSearch, torrentSearchStart)
-                    else -> bindAsCommonSearch(torrentSearch)
+                    else -> bindAsCommonSearch(torrentSearch, clickSavedSearch)
                 }
             }
         }
 
-        private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch) {
+        private fun View.bindAsCommonSearch(torrentSearch: TorrentSearch, clickSavedSearch: (String) -> Unit) {
             card_view.setOnClickListener {
+                clickSavedSearch(torrentSearch.searchQuery)
             }
             views.visibleOnly(torrentName, torrentUpdatedInfo)
             torrentUpdatedInfo.text = context.getString(R.string.item_updated_info, torrentSearch.lastSearchedItems.size, torrentSearch.lastSearchedItems.filter { !it.isViewed }.size)

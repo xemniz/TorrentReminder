@@ -36,6 +36,7 @@ class SearchFragmentViewModel : ViewModel() {
 
         searchQuerySubject
                 .debounce(300, TimeUnit.MILLISECONDS)
+                .map { it.trim() }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { searchFlowable(it) }
 
@@ -65,7 +66,7 @@ class SearchFragmentViewModel : ViewModel() {
                 .subscribe()
     }
 
-    fun searchTorrents(query: String) {
+    fun pushQuery(query: String) {
         searchQuerySubject.onNext(query)
     }
 

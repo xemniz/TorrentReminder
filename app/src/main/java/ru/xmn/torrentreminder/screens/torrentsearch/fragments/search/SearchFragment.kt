@@ -2,6 +2,7 @@ package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -27,6 +28,7 @@ import ru.xmn.torrentreminder.R
 class SearchFragment : android.support.v4.app.Fragment() {
 
     lateinit var searchFragmentViewModel: SearchFragmentViewModel
+    private var initialQuery: String = ""
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater!!.inflate(R.layout.fragment_torrent_search, container, false)
@@ -36,7 +38,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
 
         prepareSearchView()
         setupViewModel()
-        setupClickListener()
+        setupListeners()
         setupRecyclerView()
     }
 
@@ -54,22 +56,22 @@ class SearchFragment : android.support.v4.app.Fragment() {
                     torrentListLiveData.observe(this@SearchFragment, Observer {
                         showState(it!!)
                     })
-                    torrent_search_view.setQuery(searchQueryLiveData.value, false)
                     saveButtonShow.observe(this@SearchFragment, Observer {
                         updateScreen(it!!)
                     })
+                    torrent_search_view.setQuery(searchQueryLiveData.value, false)
                 }
     }
 
-    private fun setupClickListener() {
+    private fun setupListeners() {
         torrent_search_view.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String): Boolean {
-                searchFragmentViewModel.searchTorrents(p0)
+                searchFragmentViewModel.pushQuery(p0)
                 return true
             }
 
             override fun onQueryTextChange(p0: String): Boolean {
-                searchFragmentViewModel.searchTorrents(p0)
+                searchFragmentViewModel.pushQuery(p0)
                 return true
             }
 
@@ -116,7 +118,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
             }
             is SearchState.Error -> {
                 layouts.visibleOnly(error_layout)
-                error_button.setOnClickListener { searchFragmentViewModel.searchTorrents(torrent_search_view.query.toString()) }
+                error_button.setOnClickListener { searchFragmentViewModel.pushQuery(torrent_search_view.query.toString()) }
                 (torrent_searched_list.adapter as TorrentItemsAdapter).items = emptyList()
             }
         }
@@ -184,5 +186,10 @@ class SearchFragment : android.support.v4.app.Fragment() {
                         .apply { interpolator = DecelerateInterpolator() }
                         .start()
         }
+    }
+
+
+    fun setInitialQuery(query: String) {
+        this.initialQuery = query
     }
 }

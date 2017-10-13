@@ -108,6 +108,9 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
                     },
                     onInsertedAction = { position, _ ->
                         torrentItemsList.smoothScrollToPosition(position)
+                    },
+                    clickSavedSearch = {query ->
+                        (activity as NavigateActivity).gotoSavedSearch(query)
                     })
             itemAnimator = FadeInDownAnimator()
         }
@@ -121,3 +124,4 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
     }
 
 }
+
