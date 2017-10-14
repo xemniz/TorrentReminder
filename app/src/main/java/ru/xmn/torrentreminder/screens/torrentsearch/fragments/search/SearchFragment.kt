@@ -2,7 +2,6 @@ package ru.xmn.torrentreminder.screens.torrentsearch.fragments.search
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -23,12 +22,15 @@ import kotlinx.android.synthetic.main.fragment_torrent_search.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.common.extensions.visibleOnly
 import ru.xmn.torrentreminder.R
+import kotlin.properties.Delegates
 
 
 class SearchFragment : android.support.v4.app.Fragment() {
 
     lateinit var searchFragmentViewModel: SearchFragmentViewModel
-    private var initialQuery: String = ""
+    var initialQuery: String by Delegates.observable("") { _, _, query ->
+        torrent_search_view.setQuery(query, true)
+    }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater!!.inflate(R.layout.fragment_torrent_search, container, false)
@@ -57,7 +59,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
                         showState(it!!)
                     })
                     saveButtonShow.observe(this@SearchFragment, Observer {
-                        updateScreen(it!!)
+                        updateFab(it!!)
                     })
                     torrent_search_view.setQuery(searchQueryLiveData.value, false)
                 }
@@ -174,7 +176,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
     }
 
 
-    private fun updateScreen(show: Boolean) {
+    private fun updateFab(show: Boolean) {
         when {
             !show ->
                 fab.animate().translationX(300f)
@@ -186,10 +188,5 @@ class SearchFragment : android.support.v4.app.Fragment() {
                         .apply { interpolator = DecelerateInterpolator() }
                         .start()
         }
-    }
-
-
-    fun setInitialQuery(query: String) {
-        this.initialQuery = query
     }
 }

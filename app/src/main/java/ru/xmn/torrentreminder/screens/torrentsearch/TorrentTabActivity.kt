@@ -51,17 +51,17 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
             override fun onPageSelected(position: Int) {
                 viewPager.hideKeyboard()
                 val currentFragment = fragmentList[position]
-                if (currentFragment !is SavedSearchesFragment)
-                    Handler().postDelayed({ fragmentList.filterIsInstance(SavedSearchesFragment::class.java).first().deleteNewSearch() }, 300)
-            }
 
+                if (currentFragment !is SavedSearchesFragment) {
+                    Handler().postDelayed({ fragmentList.filterIsInstance(SavedSearchesFragment::class.java).first().deleteNewSearch() }, 300)
+                }
+            }
         })
     }
 
     override fun gotoSavedSearch(query: String) {
-        val searchFragmentIndex = 0
         viewPager.setCurrentItem(0, true)
-        (list[searchFragmentIndex] as SearchFragment).setInitialQuery(query)
+        (viewPager.adapter as TabAdapter).updateQuery(query)
     }
 
 }
