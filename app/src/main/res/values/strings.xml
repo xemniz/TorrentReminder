@@ -8,4 +8,5 @@
     <string name="common_error_text">Произошла ошибка.</string>
     <string name="common_retry_text">повторить</string>
     <string name="nothing_found_saved_search_text">На данный момент по этому сохраненному поиску ничего не найдено. Мы пришлем Вам оповещение, как только будут обновления.</string>
+    <string name="saved_searches_empty_text">Добавьте отслеживаемые запросы и получайте уведомления об обновлениях по ним.</string>
 </resources>

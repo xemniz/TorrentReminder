@@ -14,6 +14,8 @@ import android.widget.Toast
 import jp.wasabeef.recyclerview.animators.FadeInDownAnimator
 import kotlinx.android.synthetic.main.fragment_torrent_track.*
 import kotlinx.android.synthetic.main.fragment_torrent_track.view.*
+import ru.xmn.common.extensions.invisible
+import ru.xmn.common.extensions.visible
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 
@@ -57,8 +59,15 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
     }
 
     private fun showValue(items: List<TorrentSearch>) {
-        (torrentItemsList.adapter as SavedSearchesAdapter).items = items
-        updateScreen(items.any { it.searchQuery == "" })
+        if (items.isNotEmpty()) {
+            empty_saved_searches_layout.invisible()
+            (torrentItemsList.adapter as SavedSearchesAdapter).items = items
+            val hasNewItem = items.any { it.searchQuery == "" }
+            updateScreen(hasNewItem)
+        }else{
+            empty_saved_searches_layout.visible()
+            updateScreen(false)
+        }
     }
 
     private fun updateScreen(hasNewItem: Boolean) {
@@ -79,7 +88,6 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
                         .start()
         }
     }
-
 
     private fun setupClickListeners(view: View) {
         view.fab.setOnClickListener {
@@ -109,7 +117,7 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
                     onInsertedAction = { position, _ ->
                         torrentItemsList.smoothScrollToPosition(position)
                     },
-                    clickSavedSearch = {query ->
+                    clickSavedSearch = { query ->
                         (activity as NavigateActivity).gotoSavedSearch(query)
                     })
             itemAnimator = FadeInDownAnimator()

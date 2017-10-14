@@ -5,7 +5,7 @@ import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_torrent_search_list.*
+import kotlinx.android.synthetic.main.activity_torrent_tab.*
 import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.torrentreminder.R
@@ -18,7 +18,7 @@ import ru.xmn.torrentreminder.screens.torrentsearch.fragments.search.SearchFragm
 class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_torrent_search_list)
+        setContentView(R.layout.activity_torrent_tab)
         setupToolbar()
         setupViewPager()
         ScheduledJobService.scheduleJob(applicationContext)

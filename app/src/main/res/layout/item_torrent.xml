@@ -24,6 +24,7 @@
             app:layout_constraintEnd_toStartOf="@+id/download"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/download"
             tools:text="Torrent"/>
 
         <ImageView
