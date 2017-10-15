@@ -65,6 +65,7 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
             val hasNewItem = items.any { it.searchQuery == "" }
             updateScreen(hasNewItem)
         }else{
+            (torrentItemsList.adapter as SavedSearchesAdapter).items = emptyList()
             empty_saved_searches_layout.visible()
             updateScreen(false)
         }

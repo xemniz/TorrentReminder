@@ -9,7 +9,6 @@ import ru.xmn.torrentreminder.application.di.ApplicationModule
 import ru.xmn.torrentreminder.application.di.DaggerApplicationComponent
 
 
-
 class App : Application() {
 
     companion object {

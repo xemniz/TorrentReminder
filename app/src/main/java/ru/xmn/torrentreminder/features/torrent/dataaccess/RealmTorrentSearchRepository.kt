@@ -40,7 +40,7 @@ class RealmTorrentSearchRepository : TorrentSearchRepository {
                         .filter { newItem -> !search.torrentItems.any { oldItem -> oldItem.name == newItem.name } }
                 realm.executeTransaction {
                     search.searchQuery = searchQuery
-                    search.torrentItems.addAll(newItems.map { it.toRealm() }
+                    search.torrentItems.addAll(0, newItems.map { it.toRealm() }
                     )
                 }
             } else {
