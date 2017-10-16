@@ -21,12 +21,11 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
         return oldItems.flatMap { search ->
             Flowable.fromCallable { torrentSearcher.searchTorrents(search.searchQuery) }
                     .flatMap { resultList ->
-                        Log.d(TAG, "$search update success")
                         torrentSearchRepository.update(search.id, search.searchQuery, resultList)
                         Flowable.just(true)
                     }
                     .onErrorReturn {
-                        Log.d(TAG, "$search update error")
+                        Log.d(TAG, "${search.searchQuery} update error")
                         false
                     }
                     .subscribeOn(Schedulers.io())
@@ -40,13 +39,14 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                             oldItems.sorted { s1, s2 -> searchesComparator(s1, s2) },
                             getCurrentSavedSearches().sorted { s1, s2 -> searchesComparator(s1, s2) },
                             BiFunction { t1, t2 ->
-                        return@BiFunction convertToResult(t1, t2)
-                    })
+                                return@BiFunction convertToResult(t1, t2)
+                            })
                 }
                 .doOnNext {
-                    Log.d(TAG, "finish update $it")
+                    if (it is Result.hasUpdates) log("finish update ${it.search.searchQuery}")
                 }
                 .reduce(ArrayList<TorrentSearch>(), { list, result -> if (result is Result.hasUpdates) list.add(result.search); list })
+                .map { ArrayList(it.filter { it.lastSearchedItems.any { !it.isViewed } }) }
     }
 
     private fun convertToResult(t1: TorrentSearch, t2: TorrentSearch): Result {

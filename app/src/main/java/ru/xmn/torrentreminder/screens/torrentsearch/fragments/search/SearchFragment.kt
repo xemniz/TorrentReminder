@@ -20,6 +20,7 @@ import android.widget.SearchView
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.android.synthetic.main.fragment_torrent_search.*
 import ru.xmn.common.extensions.hideKeyboard
+import ru.xmn.common.extensions.log
 import ru.xmn.common.extensions.visibleOnly
 import ru.xmn.torrentreminder.R
 import kotlin.properties.Delegates
@@ -30,6 +31,7 @@ class SearchFragment : android.support.v4.app.Fragment() {
     lateinit var searchFragmentViewModel: SearchFragmentViewModel
     var initialQuery: String by Delegates.observable("") { _, _, query ->
         torrent_search_view.setQuery(query, true)
+        log("initialQuery: String by Delegates.observable; torrent_search_view = $torrent_search_view")
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View =

@@ -11,9 +11,10 @@ import io.reactivex.functions.Consumer
 import org.jetbrains.anko.toast
 import ru.xmn.common.extensions.log
 import ru.xmn.torrentreminder.application.App
+import ru.xmn.torrentreminder.features.torrent.TorrentNotificationRenderer.sendNotification
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
 import ru.xmn.torrentreminder.features.torrent.domain.usecases.SavedSearchServiceUseCase
-import ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches.SavedSearchesFragment
+import ru.xmn.torrentreminder.screens.torrentsearch.TorrentTabActivity
 import javax.inject.Inject
 
 class ScheduledJobService : JobService() {
@@ -28,8 +29,9 @@ class ScheduledJobService : JobService() {
     override fun onStartJob(job: JobParameters): Boolean {
         applicationContext.toast("start job")
         savedSearchServiceUseCase.updateAllItems().subscribe(Consumer {
-            //            if (it.isNotEmpty())
-            sendNotification(applicationContext, it)
+            val searchWithNotViewedItems = it.map { it.lastSearchedItems.any { !it.isViewed } }
+            if (searchWithNotViewedItems.isNotEmpty())
+                sendNotification(applicationContext, it)
             jobFinished(job, true)
         })
         return true
@@ -39,34 +41,10 @@ class ScheduledJobService : JobService() {
         return true
     }
 
-    fun sendNotification(context: Context, it: ArrayList<TorrentSearch>) {
-
-        val intent = Intent(context, SavedSearchesFragment::class.java)
-        val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
-        val builder = NotificationCompat.Builder(context)
-
-        builder.setContentIntent(pIntent)
-                .setSmallIcon(android.R.drawable.ic_media_ff)
-                .setContentTitle("Обновлено ${it.size} торрентов")
-                .setContentText("")
-                .setDefaults(Notification.DEFAULT_VIBRATE)
-
-        val notification = NotificationCompat
-                .BigTextStyle(builder)
-                .bigText(updatedItems(it))
-                .build()
-        NotificationManagerCompat.from(context).notify(0, notification)
-    }
-
-    private fun updatedItems(list: ArrayList<TorrentSearch>): String {
-        var s = ""
-        list.forEach { s += it.searchQuery + " +" + it.lastSearchedItems.filter { !it.isViewed }.size + "\n" }
-        return s
-    }
-
     companion object {
         private const val DAY_IN_MILLIS = 60 * 60 * 24
         private const val DAILY_JOB_TAG = "UpdateAllTorrentsEveryDay"
+        val INTENT_KEY: String = "ru.xmn.torrentreminder.features.torrent.UpdatedTorrentsList"
 
         fun scheduleJob(context: Context) {
             log("scheduling job")
@@ -87,5 +65,36 @@ class ScheduledJobService : JobService() {
                     .setConstraints(Constraint.ON_ANY_NETWORK)
                     .build()
         }
+
+    }
+}
+
+object TorrentNotificationRenderer{
+    fun sendNotification(context: Context, it: ArrayList<TorrentSearch>) {
+
+        val intent = Intent(context, TorrentTabActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        intent.putStringArrayListExtra(ScheduledJobService.INTENT_KEY, ArrayList(it.map { it.searchQuery }))
+        val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val builder = NotificationCompat.Builder(context)
+
+        builder.setContentIntent(pIntent)
+                .setSmallIcon(android.R.drawable.ic_media_ff)
+                .setContentTitle("Обновлено ${it.size} торрентов")
+                .setContentText("")
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+
+        val notification = NotificationCompat
+                .BigTextStyle(builder)
+                .bigText(updatedItems(it))
+                .build()
+        notification.flags = Notification.FLAG_AUTO_CANCEL
+        NotificationManagerCompat.from(context).notify(0, notification)
+    }
+
+    private fun updatedItems(list: ArrayList<TorrentSearch>): String {
+        var s = ""
+        list.forEach { s += it.searchQuery + " +" + it.lastSearchedItems.filter { !it.isViewed }.size + "\n" }
+        return s
     }
 }

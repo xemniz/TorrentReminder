@@ -10,9 +10,11 @@ import kotlinx.android.synthetic.main.toolbar.*
 import ru.xmn.common.extensions.hideKeyboard
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.ScheduledJobService
-import ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches.NavigateActivity
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.NavigateActivity
 import ru.xmn.torrentreminder.screens.torrentsearch.fragments.savedsearches.SavedSearchesFragment
 import ru.xmn.torrentreminder.screens.torrentsearch.fragments.search.SearchFragment
+import android.content.Intent
+import ru.xmn.common.extensions.log
 
 
 class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
@@ -22,6 +24,22 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
         setupToolbar()
         setupViewPager()
         ScheduledJobService.scheduleJob(applicationContext)
+        processIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        processIntent(intent)
+    }
+
+    private fun processIntent(intent: Intent) {
+        log("processIntent, intent.hasExtra(ScheduledJobService.INTENT_KEY) = ${intent.hasExtra(ScheduledJobService.INTENT_KEY)}")
+        if (intent.hasExtra(ScheduledJobService.INTENT_KEY)) {
+            val updatedList = intent.getStringArrayListExtra(ScheduledJobService.INTENT_KEY)
+            if (updatedList.size == 1)
+                gotoSavedSearch(updatedList[0])
+            else
+                gotoSavedSearchList()
+        }
     }
 
     private fun setupToolbar() {
@@ -31,8 +49,7 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
 
     private val list: List<Fragment>
         get() {
-            val fragmentList = listOf<Fragment>(SearchFragment(), SavedSearchesFragment())
-            return fragmentList
+            return listOf(SearchFragment(), SavedSearchesFragment())
         }
 
     private fun setupViewPager() {
@@ -60,8 +77,13 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
     }
 
     override fun gotoSavedSearch(query: String) {
+        log("gotoSavedSearch, query = $query")
         viewPager.setCurrentItem(0, true)
         (viewPager.adapter as TabAdapter).updateQuery(query)
+    }
+
+    override fun gotoSavedSearchList() {
+        viewPager.setCurrentItem(1, true)
     }
 
 }

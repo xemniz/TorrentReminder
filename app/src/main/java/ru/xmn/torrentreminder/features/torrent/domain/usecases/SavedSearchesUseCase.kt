@@ -21,7 +21,9 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
     }
 
     fun firstSearchOnItem(id: String, searchQuery: String): Completable {
-        return Flowable.fromCallable { torrentSearcher.searchTorrents(searchQuery) }
+        return Flowable
+                .fromCallable { torrentSearchRepository.update(id, searchQuery, emptyList()) }
+                .flatMap { Flowable.fromCallable {  torrentSearcher.searchTorrents(searchQuery)  } }
                 .flatMapCompletable { Completable.fromCallable { torrentSearchRepository.update(id, searchQuery, it) } }
                 .doOnError { torrentSearchRepository.update(id, searchQuery, emptyList()) }
     }

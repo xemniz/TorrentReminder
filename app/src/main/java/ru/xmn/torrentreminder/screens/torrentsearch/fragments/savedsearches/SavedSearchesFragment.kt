@@ -18,6 +18,7 @@ import ru.xmn.common.extensions.invisible
 import ru.xmn.common.extensions.visible
 import ru.xmn.torrentreminder.R
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
+import ru.xmn.torrentreminder.screens.torrentsearch.fragments.NavigateActivity
 
 class SavedSearchesFragment : android.support.v4.app.Fragment() {
 
@@ -121,7 +122,7 @@ class SavedSearchesFragment : android.support.v4.app.Fragment() {
                     clickSavedSearch = { query ->
                         (activity as NavigateActivity).gotoSavedSearch(query)
                     })
-            itemAnimator = FadeInDownAnimator()
+            itemAnimator = FadeInDownAnimator().apply { supportsChangeAnimations = true }
         }
     }
 
