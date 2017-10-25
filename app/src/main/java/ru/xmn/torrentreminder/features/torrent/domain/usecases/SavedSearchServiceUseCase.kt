@@ -17,7 +17,6 @@ class SavedSearchServiceUseCase
 constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: TorrentSearchRepository) {
     fun updateAllItems(): Single<ArrayList<TorrentSearch>> {
         val oldItems = getCurrentSavedSearches()
-        log("updateAllItems() called")
         return oldItems.flatMap { search ->
             Flowable.fromCallable { torrentSearcher.searchTorrents(search.searchQuery) }
                     .flatMap { resultList ->
@@ -41,9 +40,6 @@ constructor(val torrentSearcher: TorrentSearcher, val torrentSearchRepository: T
                             BiFunction { t1, t2 ->
                                 return@BiFunction convertToResult(t1, t2)
                             })
-                }
-                .doOnNext {
-                    if (it is Result.hasUpdates) log("finish update ${it.search.searchQuery}")
                 }
                 .reduce(ArrayList<TorrentSearch>(), { list, result -> if (result is Result.hasUpdates) list.add(result.search); list })
                 .map { ArrayList(it.filter { it.lastSearchedItems.any { !it.isViewed } }) }

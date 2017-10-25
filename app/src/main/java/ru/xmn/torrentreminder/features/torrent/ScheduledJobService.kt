@@ -8,8 +8,6 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import com.firebase.jobdispatcher.*
 import io.reactivex.functions.Consumer
-import org.jetbrains.anko.toast
-import ru.xmn.common.extensions.log
 import ru.xmn.torrentreminder.application.App
 import ru.xmn.torrentreminder.features.torrent.TorrentNotificationRenderer.sendNotification
 import ru.xmn.torrentreminder.features.torrent.domain.TorrentSearch
@@ -27,7 +25,6 @@ class ScheduledJobService : JobService() {
     }
 
     override fun onStartJob(job: JobParameters): Boolean {
-        applicationContext.toast("start job")
         savedSearchServiceUseCase.updateAllItems().subscribe(Consumer {
             val searchWithNotViewedItems = it.map { it.lastSearchedItems.any { !it.isViewed } }
             if (searchWithNotViewedItems.isNotEmpty())
@@ -47,7 +44,6 @@ class ScheduledJobService : JobService() {
         val INTENT_KEY: String = "ru.xmn.torrentreminder.features.torrent.UpdatedTorrentsList"
 
         fun scheduleJob(context: Context) {
-            log("scheduling job")
             val dispatcher = FirebaseJobDispatcher(GooglePlayDriver(context))
             val job = createDailyJob(dispatcher)
             dispatcher.mustSchedule(job)
@@ -58,9 +54,9 @@ class ScheduledJobService : JobService() {
                     .setLifetime(Lifetime.FOREVER)
                     .setService(ScheduledJobService::class.java)
                     .setTag(DAILY_JOB_TAG)
-                    .setReplaceCurrent(true)
+                    .setReplaceCurrent(false)
                     .setRecurring(true)
-                    .setTrigger(Trigger.executionWindow(20, 100))
+                    .setTrigger(Trigger.executionWindow(20, DAY_IN_MILLIS))
                     .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                     .setConstraints(Constraint.ON_ANY_NETWORK)
                     .build()
@@ -69,7 +65,7 @@ class ScheduledJobService : JobService() {
     }
 }
 
-object TorrentNotificationRenderer{
+object TorrentNotificationRenderer {
     fun sendNotification(context: Context, it: ArrayList<TorrentSearch>) {
 
         val intent = Intent(context, TorrentTabActivity::class.java)

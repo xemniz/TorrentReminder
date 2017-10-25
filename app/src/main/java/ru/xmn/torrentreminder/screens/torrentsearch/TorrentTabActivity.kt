@@ -18,6 +18,8 @@ import ru.xmn.common.extensions.log
 
 
 class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
+    private val list: List<Fragment> = listOf(SearchFragment(), SavedSearchesFragment())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_torrent_tab)
@@ -32,11 +34,10 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
     }
 
     private fun processIntent(intent: Intent) {
-        log("processIntent, intent.hasExtra(ScheduledJobService.INTENT_KEY) = ${intent.hasExtra(ScheduledJobService.INTENT_KEY)}")
         if (intent.hasExtra(ScheduledJobService.INTENT_KEY)) {
             val updatedList = intent.getStringArrayListExtra(ScheduledJobService.INTENT_KEY)
             if (updatedList.size == 1)
-                gotoSavedSearch(updatedList[0])
+                Handler().postDelayed({gotoSavedSearch(updatedList[0])}, 200)
             else
                 gotoSavedSearchList()
         }
@@ -46,11 +47,6 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
         setSupportActionBar(toolbar)
         supportActionBar?.title = ""
     }
-
-    private val list: List<Fragment>
-        get() {
-            return listOf(SearchFragment(), SavedSearchesFragment())
-        }
 
     private fun setupViewPager() {
         val fragmentList = list
@@ -77,7 +73,6 @@ class TorrentTabActivity : AppCompatActivity(), NavigateActivity {
     }
 
     override fun gotoSavedSearch(query: String) {
-        log("gotoSavedSearch, query = $query")
         viewPager.setCurrentItem(0, true)
         (viewPager.adapter as TabAdapter).updateQuery(query)
     }

@@ -25,14 +25,12 @@ class TabAdapter(manager: FragmentManager, val fragmentList: List<Fragment>,
     private var query: String? = null
 
     fun updateQuery(query: String) {
-        log("updateQuery, query = $query")
         this.query = query
         notifyDataSetChanged()
     }
 
     override fun getItemPosition(o: Any?): Int {
         if (o is SearchFragment) {
-            log("getItemPosition o = $o, query = $query")
             o.initialQuery = query?:""
             query = null
         }
